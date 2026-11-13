@@ -59,6 +59,33 @@ platta; på en ljus yta blir texten svart.
 Alla färger är Ung Cancers egna. Theme → Custom CSS ska vara tomt i alla
 kampanjer.
 
+## Gåvokortskampanjerna
+
+Gåvokortskampanjerna (flödet från 300 Minnesgåva: belopp, formulär med
+arket bredvid, Swish, gåvokortssida med PDF) har ett eget paket. P2P-filerna
+laddas inte där.
+
+**Theme → Head Markup (for Scripts)** — de här två raderna:
+
+```html
+<link rel="stylesheet" href="https://ungcancer-prod.github.io/adoveo-p2p/uc-gavokort.css">
+<script src="https://ungcancer-prod.github.io/adoveo-p2p/uc-gavokort.js"></script>
+```
+
+SVG:n `#shape-box` ritas av scriptet och kan tas bort ur Head Markup.
+
+Ska vara tomma: Theme → Custom CSS (Desktop/Mobile också) och Form-stegets
+**Custom script for this step**. Giftcards-stegets script (gåvokortssidan)
+ligger kvar i Adoveo tills vidare.
+
+Texterna som scriptet skriver (spökskrift på arket, hälsningsförslagen,
+knapparna) ligger per kampanj i `KAMPANJER` i `src/gavokort/js/uc-gavokort.js`.
+
+| Id | Vad | Kod | Innehåll |
+|---|---|---|---|
+| 300 | Minnesgåva | inline i Adoveo (förlagan, inte flyttad) | – |
+| 311 | En vanlig jul - Gåvokort | `uc-gavokort` | `inputfalt/311-en-vanlig-jul.html` |
+
 ## Ny kampanj
 
 1. Skapa den i Adoveo (P2P-mall eller Summary-mall).

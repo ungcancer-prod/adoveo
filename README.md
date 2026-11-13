@@ -1,8 +1,8 @@
 # adoveo-p2p
 
-Kod för Ung Cancers P2P-insamlingar på Adoveo (ungcancer.adoveo.com):
-CSS, header med meny och sök, och dokumentation av vad som ligger i
-vilken kampanj.
+Kod för Ung Cancers kampanjer på Adoveo (ungcancer.adoveo.com):
+P2P-insamlingarna (CSS, header med meny och sök) och gåvokortskampanjerna
+(paketet `uc-gavokort`), och dokumentation av vad som ligger i vilken kampanj.
 
 Alla P2P-sidor laddar två filer härifrån. Ändrar man något här slår det
 igenom på alla sidor inom några minuter — ingen kopiering in i Adoveo.
@@ -40,6 +40,9 @@ kontrollera efteråt.
 | Oregelbundna kanter (formen `#shape-box`) | `src/js/uc-p2p.js`, `SHAPES`. Lägg kanten på valfritt element med `class="uc-clip"` |
 | Konceptfärgerna | Adoveos färgväljare (wrapperns bakgrund) i respektive kampanj, se `adoveo/kampanjer.md` |
 | Rubriker, texter, fältetiketter | ligger i Adoveo, dokumenterade i `adoveo/inputfalt/` |
+| **Gåvokort:** typografi, knappar, beloppsknappar | `src/gavokort/css/01-bas.css` |
+| **Gåvokort:** arket (förhandsvisning, gåvokortssida, PDF-läge), hälsningsfältet | `src/gavokort/css/02-ark.css` |
+| **Gåvokort:** texter i scriptet (spökskrift, hälsningsförslag, knappar) | `KAMPANJER` i `src/gavokort/js/uc-gavokort.js` |
 
 `dist/` skapas av bygget och ska inte ändras — den finns inte ens i repot.
 Bilder i `src/assets/` kopieras av bygget och publiceras bredvid CSS:en och JS:en.
@@ -67,6 +70,15 @@ innehållet → klistra in i filen och spara igen. Eller be Claude backa.
   ska inte skrivas dit.
 - **Rotfonten:** Adoveo har `html { font-size: 62.5% }`, så 1rem = 10px.
   Typografi-tokens är omräknade ×1.6 — se kommentaren i `01-bas.css`.
+
+## Två paket
+
+| Paket | Används av | Filer |
+|---|---|---|
+| `uc-p2p` | P2P-sidorna (294–299, 308) | `src/css/`, `src/js/uc-p2p.js` |
+| `uc-gavokort` | Gåvokortskampanjerna (311) | `src/gavokort/css/`, `src/gavokort/js/uc-gavokort.js` |
+
+En ändring i det ena paketet rör inte sidorna som laddar det andra.
 
 ## Kampanjerna
 

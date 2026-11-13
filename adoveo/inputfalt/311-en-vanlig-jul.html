@@ -1,0 +1,117 @@
+<!--
+==========================================================================
+  GÅVOKORT — EN VANLIG JUL   (kampanj 311)
+  Kopia av 300 (Minnesgåva). Samma flöde: belopp -> formulär med arket
+  bredvid -> Swish -> SMS med länk till gåvokortssidan /c/… med PDF.
+  Kod: uc-gavokort.css/.js, se adoveo/kampanjer.md.
+
+  STATUS 2026-11-13: allt nedan är 300:s innehåll som det ligger i 311
+  idag. Julcopyn är inte skriven. Byt texten fält för fält, och lägg
+  scriptets texter (spökskrift, hälsningsförslag, knappar) i KAMPANJER
+  ['311'] i src/gavokort/js/uc-gavokort.js.
+
+  Inga emoji i något fält, spara kraschar.
+==========================================================================
+-->
+
+
+<!-- ======================================================================
+     PRODUCTS (landningssidan)
+     ====================================================================== -->
+
+<!-- Heading -->
+Ung Cancer Minnesgåva
+
+<!-- Description (text ovanför beloppen) -->
+<p>Till minne av någon förlorad.</p><br><p>Din minnesgåva går till trygghet, gemenskap och stöd för unga vuxna som möter cancer.</p>
+<br>
+
+<!-- Produkter: 200 kr, 500 kr, 800 kr, valfritt belopp (min 50 kr) -->
+<!-- Valfritt belopp: platshållare -->
+Eller valfritt belopp
+<!-- Valfritt belopp: knapp -->
+Skriv minnesbladet
+
+<!-- Bottom text -->
+<p class="uc-quote" style="font-size: 27px; margin: 40px 0;">
+FÖR ATT INGEN UNG VUXEN SKA MÖTA CANCER ENSAM
+</p>
+<p class="uc-small" style="margin-bottom: 20px;">
+När du ger en gåva kommer dina uppgifter att behandlas av Ung Cancer.
+<a href="https://ungcancer.se/integritetspolicy-ung-cancer/" target="_blank">Läs här</a> om hur vi behandlar dina personuppgifter
+</p>
+<img src="https://content.adoveodemo.com/1772548866146_ungcanceradoveologorowblack260109dl.png" style="max-width: 100%;">
+
+<!-- Custom script for this step: tomt -->
+
+
+<!-- ======================================================================
+     FORM (formuläret)
+     ====================================================================== -->
+
+<!-- Heading -->
+Till minne av
+
+<!-- Description -->
+<p>Vi gör i ordning ett minnesblad som du kan skriva ut eller skicka vidare till begravningsbyrån.</p><br>
+
+<!-- Fält, i ordning (etikett = platshållare) -->
+<!--   Receiver Name   "Till minne av"                  (max 80 tecken, sätts av scriptet) -->
+<!--   Message         "Hälsning"                       (blir textarea, max 300 tecken)    -->
+<!--   Sender Name     "Ditt/era namn"                                                     -->
+<!--   Sender Phone    "Ditt telefonnummer (för SMS)"                                      -->
+<!--   Divider         "Du får ett SMS med en länk till minnesbladet."                    -->
+<!-- Skicka-knappen -->
+Ge minnesgåva
+
+<!-- Swish-instruktionen (#showText) -->
+<div class="uc-swish-instruction">
+<h2>Öppna Swish på din telefon och vänta på att det laddar</h2>
+<div class="uc-instruction-text">
+Exempel <img src="https://content.adoveodemo.com/1718193198450_ucarrow.png" class="uc-arrow-img">
+<br><br>
+</div>
+<img src="https://content.adoveodemo.com/1746123475256_1719332637098swishappscreen.png" class="uc-app-screenshot">
+</div>
+
+<!-- Bottom text (#swish_form_underlay_text) -->
+<p class="uc-small" style="margin-bottom: 20px;">
+När du ger en gåva kommer dina uppgifter att behandlas av Ung Cancer.
+<a href="https://ungcancer.se/integritetspolicy-ung-cancer/" target="_blank">Läs här</a> om hur vi behandlar dina personuppgifter
+</p>
+<img src="https://content.adoveodemo.com/1772548866146_ungcanceradoveologorowblack260109dl.png" style="max-width: 100%;">
+
+<!-- Custom script for this step: ska vara TOMT när uc-gavokort.js ligger i
+     Head Markup (300 har två script här, uc-minne och uc-vers). -->
+
+
+<!-- ======================================================================
+     GIFTCARDS (arket: förhandsvisningen i formuläret och gåvokortssidan)
+     Tre block, i den ordning de står på arket.
+     ====================================================================== -->
+
+<!-- Block 1 (#coupon-page-title) -->
+<h3>Till minne av</h3>
+<h1>{receiver_name}</h1>
+<p class="uc-subtitle">har Ung Cancer tacksamt tagit emot en gåva</p>
+<br>
+<img src="https://content.adoveodemo.com/1788246670954_ungcancerheart260901dl.png" style="max-width: 20%;">
+
+<!-- Block 2 (#coupon-page-message) -->
+<blockquote>{message}</blockquote>
+<cite>{sender_name}</cite>
+
+<!-- Block 3 (#coupon-landing-message-text) -->
+<img src="https://content.adoveodemo.com/1788234576404_ungcancerlogotypsvart800x800260901dl.png" style="max-width: 20%;">
+
+<!-- Under arket i förhandsvisningen -->
+<p style="font-size: 16px; margin: 0 auto; text-align: center; ">Behöver du hjälp? Kontakta Ung Cancer via <a href="mailto:givarservice@ungcancer.se">givarservice@ungcancer.se</a> eller 010-70 79 670</p>
+
+<!-- Custom script for this step: gåvokortssidans script (visningsskala
+     --uc-k, flyttar ut nedladdningsknappen, body.uc-pdf-render vid klick).
+     Ligger kvar i Adoveo tills det är flyttat in i uc-gavokort.js. -->
+
+
+<!-- ======================================================================
+     END PAGE (tacksidan) — ej inventerad
+     ====================================================================== -->
