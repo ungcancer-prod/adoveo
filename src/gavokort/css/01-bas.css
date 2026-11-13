@@ -1,0 +1,280 @@
+/* ==========================================================================
+   UNG CANCER — GÅVOKORT PÅ ADOVEO: bas
+   --------------------------------------------------------------------------
+   Gåvokortskampanjernas grund: typografi, knappar, fält, Swish-steget och
+   beloppsknapparna. Lyft ur kampanj 300 (Minnesgåva) 2026-11-13, där den
+   låg i Theme → Custom CSS. Sektionsnumren följer 300.
+
+   Filen laddas via Head Markup, alltså FÖRE Adoveos egen CSS. Bygget lägger
+   :not(uc-x) sist i varje selektor så att våra regler ändå vinner när
+   specificiteten är lika, precis som när koden låg sist i Custom CSS.
+
+   Rotfonten: Adoveo har html { font-size: 62.5% }, alltså 1rem = 10px.
+   Den här filen använder px.
+   ========================================================================== */
+
+/* ==========================================================================
+   1. FONTER & TYPOGRAFI
+   Customfont1/2 (Apercu) läggs in av Adoveo från temainställningarna.
+   ========================================================================== */
+@font-face {
+  font-family: 'quickwriterslight';
+  src: url('https://content.adoveodemo.com/1744604411042_quickwriterslight.woff');
+}
+h1, h2, h3, h4 {
+  font-family: Customfont1;
+  text-transform: uppercase;
+  letter-spacing: -0.03em;
+  line-height: 105%;
+}
+h1 { font-size: 44px; }
+h2 { font-size: 32px; }
+h3 { font-size: 24px; }
+h4 { font-size: 20px; }
+blockquote {
+  padding: 0;
+  margin: 0 0 20px;
+  font-family: 'quickwriterslight';
+  font-size: 40px;
+  line-height: 1;
+  border-left: none;
+  max-width: 32ch;
+}
+cite {
+  font-family: Customfont2;
+  font-size: 16px;
+  font-style: normal;
+  text-transform: uppercase;
+  padding: 0;
+  margin: 0 0 20px;
+}
+.uc-pre-header {
+  font-family: 'quickwriterslight';
+  font-size: 20px;
+  line-height: 1;
+  margin-bottom: 40px;
+}
+.uc-quote {
+  font-family: 'quickwriterslight';
+  font-size: 40px;
+  line-height: 1;
+  margin-bottom: 40px;
+}
+.uc-subtitle {
+  font-family: Customfont2;
+  font-size: 16px;
+  line-height: 1;
+  text-transform: none;
+  max-width: 32ch;
+  margin: 0 auto;
+}
+.uc-small { font-size: 10px; }
+.cc-title {
+  letter-spacing: -0.03em;
+  line-height: 105%;
+  text-transform: uppercase;
+}
+
+/* ==========================================================================
+   2. LAYOUT
+   .wrapper och .hero-img klipps med formen #shape-box, som scriptet ritar.
+   ========================================================================== */
+#wrap-default {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.wrapper {
+  -webkit-clip-path: url(#shape-box);
+  clip-path: url(#shape-box);
+  min-height: 200px;
+  margin: 12px;
+}
+.hero-img {
+  -webkit-clip-path: url(#shape-box);
+  clip-path: url(#shape-box);
+}
+@media (min-width: 768px) {
+  .wrapper { margin: 40px 0; }
+}
+.uc-campaign-head {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+.uc-campaign-head img { max-width: 140px; }
+
+/* ==========================================================================
+   3. KNAPPAR & FÄLT
+   ========================================================================== */
+button {
+  flex-grow: 0;
+  text-transform: uppercase;
+}
+.cc-button, .btn-primary {
+  width: auto;
+  display: inline-block;
+}
+.cc-button {
+  font-family: Customfont1;
+  font-feature-settings: "liga" 1;
+  font-size: 24px;
+  text-transform: uppercase;
+  letter-spacing: -.007em;
+  line-height: 24px;
+  color: #282826;
+  border: 2px solid #282826;
+  margin: 6px auto 6px auto;
+  padding: 8px 8px 6px 8px;
+  border-radius: 0;
+}
+.cc-button:hover {
+  background-color: #282826;
+  color: #ffffff;
+  border: 2px solid #282826;
+}
+.cc-button:active { border: 2px solid #282826; }
+.cc-btn-third, .cc-btn-secondary { color: #282826; }
+.cc-button-inline-product { margin-bottom: 24px; }
+.cc-button-custom-product { border-radius: 0; }
+#send_button3 { margin-bottom: 32px; }
+/* Länkar inuti knappar */
+.cc-button .cc-link {
+  color: #282826;
+  text-decoration: none;
+}
+.cc-button .cc-link:hover,
+.cc-button .cc-link:active,
+.cc-button .cc-link:focus {
+  color: #fff;
+  text-decoration: none;
+}
+.cc-input {
+  font-family: Customfont2;
+  font-size: 20px;
+  padding: 12px 8px 0px 8px;
+}
+#uc-halsning { padding: 12px 8px 8px 8px; }
+
+/* ==========================================================================
+   6. SWISH & FORMULÄR
+   ========================================================================== */
+#errorText {
+  color: #DA233C;   /* Ung Cancers röda (300 har CSS-färgen red) */
+  margin-bottom: 24px;
+}
+.swish-done { margin-top: 24px; }
+.swish-error {
+  font-family: Customfont2, Adoveo;
+  font-size: 22px;
+  font-weight: 400;
+  letter-spacing: normal;
+  line-height: normal;
+  text-transform: none !important;   /* plattformen sätter versaler */
+}
+#swish_form_underlay_text { margin-top: 40px; }
+button[name="swish-send"] {
+  background-image: url('https://content.adoveodemo.com/1764565089310_swishlogo400x400.png');
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 30px 30px;
+  padding-right: 45px;
+}
+.uc-swish-instruction {
+  max-width: 390px;
+  margin: 0 auto;
+}
+.uc-instruction-text {
+  font-size: 16px;
+  font-family: Customfont2, Adoveo;
+  text-align: center;
+  text-transform: none !important;   /* plattformen sätter versaler */
+}
+.uc-thank-you {
+  max-width: 390px;
+  margin: 0 auto;
+  text-decoration: none;
+}
+#text_divider_group {
+  font-size: 14px;
+  margin: 8px auto;
+}
+
+/* ==========================================================================
+   7. BILDER & LOGOTYPER
+   ========================================================================== */
+.uc-logo-container {
+  text-align: center;
+  margin: 0 auto 32px auto;
+  max-width: 600px;
+}
+.uc-logo-container img {
+  display: block;
+  margin: 0 auto;
+  background-color: rgba(0, 0, 0, 0);
+  max-width: 100%;
+  width: 100%;
+  height: auto;
+}
+.uc-image {
+  max-width: 160px;
+  padding: 20px 0 20px 20px;
+  margin: 0;
+}
+.uc-arrow-img {
+  background-color: transparent;
+  max-width: 12%;
+  padding-top: 4px;
+  margin-top: 4px;
+}
+.uc-app-screenshot {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ==========================================================================
+   9. RESPONSIVITET
+   ========================================================================== */
+@media (max-width: 500px) {
+  .uc-title { font-size: 36px; }
+}
+@media (min-width: 768px) {
+  .uc-logo-container img {
+    width: 50%;
+    margin: 0 auto;
+  }
+}
+
+/* ==========================================================================
+   10. BELOPPSKNAPPARNA — tre i rad
+   Adoveo staplar knapparna vertikalt. Här floatas de tre yttre raderna
+   sida vid sida. Prefixet .cc-button-custom-product träffar bara de yttre
+   raderna, inte den nästlade .swish_product_row_3 inuti rad 3.
+   ========================================================================== */
+.cc-button-custom-product.swish_product_row_1,
+.cc-button-custom-product.swish_product_row_2,
+.cc-button-custom-product.swish_product_row_3 {
+  float: left;
+  width: calc(33.33% - 6px);
+  margin: 6px 3px;
+  min-height: 0;   /* plattformen ger 49px */
+}
+button.cc-button-custom-product {
+  width: 100%;
+  max-width: 100%;
+}
+/* Fältet för valfritt belopp ska inte flyta in bredvid knapparna */
+.swish-below-text { clear: both; }
+/* Riktigt smala skärmar: en knapp per rad */
+@media (max-width: 359px) {
+  .cc-button-custom-product.swish_product_row_1,
+  .cc-button-custom-product.swish_product_row_2,
+  .cc-button-custom-product.swish_product_row_3 {
+    float: none;
+    width: 100%;
+    margin: 6px auto;
+  }
+  .swish-below-text { clear: none; }
+}
+.amount-qualifier-monthly, .amount-qualifier-onetime { margin-top: -8px; }

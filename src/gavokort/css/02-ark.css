@@ -1,0 +1,462 @@
+/* ==========================================================================
+   11. ARKET — förhandsvisningen i formuläret och gåvokortssidan /c/…
+   --------------------------------------------------------------------------
+   Mekaniken från kampanj 300 (rev 7). Arket ritas alltid i PDF:ens
+   geometri och krymps bara i visningen.
+
+   BREDDKEDJAN I KAMPANJFLÖDET (uppmätt):
+     body.campaign-flow
+       #wrap-default        <- admin "Wrapper Width" landar HÄR
+         .content-wrapper
+           #phase-swish-form
+             .wrapper
+               form.swish-form
+
+   ARKETS GEOMETRI: Adoveos html2pdf skalar inte till A4 utan mappar
+   794px = 210mm. Arket måste därför alltid vara 794px brett i layouten,
+   annars blöder innehållet ut åt höger och nedåt. Höjden är 1100 och inte
+   1123 för att lämna marginal mot sidbrytningen. Visningen krymps med
+   transform, som inte påverkar layouten, så skärm och fil är
+   proportionellt identiska.
+
+   Förhandsvisningen i formuläret och gåvokortssidan delar id:n
+   (#coupon-page-title, #coupon-page-message), så arkets typografi skrivs
+   en gång och slår igenom på båda.
+
+   1100 finns på tre ställen och ska hållas i synk: 11.1 (calc), 11.4
+   (--uc-blad-h) och gåvokortssidans script (BLAD_H).
+   ========================================================================== */
+
+/* --- 11.1 FÖRHANDSVISNINGEN — samma geometri som arket -------------------
+   Adoveo lägger in en stilmall i körtid, efter vår CSS, med bl.a.
+   #giftcard-preview { width: 375px; height: 667px } och
+   #giftcard-preview-container { width: 0; max-height: calc(600.3px) }.
+   Allt vi sätter på de två elementen måste därför vara !important.
+   #giftcard-preview bär också transform: scale(0.9) från popupen.
+   Innehållet ligger i en div.wrapper som ärver sidans wrapper-regler
+   (clip-path, 390px). Det är .wrapper som bär papperet.
+   Skalan --uc-kp sätts av scriptet utifrån rutans faktiska bredd. */
+
+#giftcard-preview {
+  display: block !important;
+  position: static !important;
+  width: 100% !important;
+  max-width: none !important;
+  height: calc(1100px * var(--uc-kp, 0.529)) !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  aspect-ratio: auto !important;
+  margin: 0;
+  overflow: hidden !important;
+  transform: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: 0 14px 36px rgba(40, 40, 38, .12) !important;
+}
+
+#giftcard-preview > .wrapper {
+  width: 794px !important;
+  max-width: none !important;
+  height: 1100px !important;
+  min-height: 0 !important;
+  clip-path: none !important;
+  margin: 0 !important;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: #ffffff !important;
+  transform: scale(var(--uc-kp, 0.529));
+  transform-origin: top left;
+}
+
+/* --- 11.2 FORMULÄRET PÅ DESKTOP -----------------------------------------
+   Formuläret behåller sina 390px och glider åt vänster. Arket ligger till
+   höger, flyttat dit av scriptet. body.uc-form-step sätts av scriptet. */
+
+@media (min-width: 900px) {
+
+  /* 390 + 48 + 420 = 858, så 900 räcker */
+  body.uc-form-step #wrap-default {
+    width: 900px !important;
+    max-width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+  body.uc-form-step .content-wrapper {
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  /* Adoveo skriver style="display: block" inline på fasen när den visas,
+     därav !important. Men Adoveo gömmer också fasen med style="display:
+     none", och ett oskyddat !important skulle slå även det. Därför
+     :not([style*="none"]): är fasen gömd matchar regeln inte alls. */
+  body.uc-form-step #phase-swish-form:not([style*="none"]) {
+    display: flex !important;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 48px;
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  body.uc-form-step #phase-swish-form > .wrapper {
+    flex: 0 0 390px;
+  }
+
+  /* Plattformens absoluta positionering och left-offset nollas, annars
+     ligger behållaren kvar där popupen vill ha den. */
+  body.uc-form-step #phase-swish-form > #giftcard-preview-container {
+    display: block !important;
+    position: sticky !important;
+    top: 40px !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    flex: 0 0 420px;
+    width: 420px !important;
+    height: auto !important;
+    max-height: none !important;
+    margin-top: 40px;
+    z-index: auto;
+  }
+
+  #phase-swish-form #hide-preview,
+  #phase-swish-form #giftcard-preview-button {
+    display: none !important;
+  }
+}
+
+/* --- 11.3 FORMULÄRET PÅ MOBIL — förhandsvisningen som modal --------------
+   Scriptet flyttar behållaren till #phase-swish-form: formulärets .wrapper
+   har clip-path, och clip-path på en förälder klipper även position: fixed
+   hos barnen.
+
+   Behållaren ÄR modalen: täcker vyn, bär bakgrunden, centrerar arket.
+   fixed räknas inte mot vyn här (390 x 808 med 18px glapp), därför tätas
+   kanterna med box-shadow 100vmax.
+
+   Gaten måste vara positiv. Innan användaren rört popupen finns ingen
+   inline-stil alls, så :not([style*="none"]) skulle öppna modalen redan
+   vid sidladdning. flex finns med eftersom jQuery .show() kan återställa
+   ett cachat display-värde. */
+
+@media (max-width: 899px) {
+
+  #phase-swish-form > #giftcard-preview-container {
+    position: fixed !important;
+    inset: 0 !important;
+    width: auto !important;
+    height: auto !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 16px;
+    box-sizing: border-box;
+    z-index: 999 !important;
+    align-items: center;
+    justify-content: center;
+    background: rgba(40, 40, 38, .55);
+    box-shadow: 0 0 0 100vmax rgba(40, 40, 38, .55);
+  }
+
+  /* Display enbart när popupen faktiskt är öppnad. */
+  #phase-swish-form > #giftcard-preview-container[style*="block"],
+  #phase-swish-form > #giftcard-preview-container[style*="flex"] {
+    display: flex !important;
+  }
+
+  /* relative, så att krysset ankras mot arket och inte mot vyn. */
+  #phase-swish-form #giftcard-preview {
+    position: relative !important;
+    width: 100% !important;
+    max-width: 420px !important;
+  }
+
+  /* Plattformens kryss är en tom träffyta. Vi ritar det själva. */
+  #phase-swish-form #hide-preview {
+    display: block !important;
+    position: absolute !important;
+    top: 12px !important;
+    right: 12px !important;
+    left: auto !important;
+    bottom: auto !important;
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 50% !important;
+    background: #282826 !important;
+    opacity: 1 !important;
+    z-index: 5 !important;
+    cursor: pointer;
+  }
+  #phase-swish-form #hide-preview::before,
+  #phase-swish-form #hide-preview::after {
+    content: "" !important;
+    position: absolute;
+    left: 10px;
+    top: 17px;
+    width: 16px;
+    height: 2px;
+    background: #FCF7E3;
+    font-size: 0;
+  }
+  #phase-swish-form #hide-preview::before { transform: rotate(45deg); }
+  #phase-swish-form #hide-preview::after { transform: rotate(-45deg); }
+
+  /* Öppna-knappen. Texten kommer från scriptet (TEXT.forhandsvisa). */
+  #phase-swish-form #confirm_button_group {
+    flex-direction: column;
+    gap: 10px;
+  }
+  #phase-swish-form #giftcard-preview-button {
+    width: 100%;
+    text-align: center;
+  }
+  #phase-swish-form #giftcard-preview-button span::after {
+    content: var(--uc-preview-label, "Se kortet");
+    margin-left: 10px;
+    vertical-align: middle;
+  }
+  #phase-swish-form #giftcard-preview-button .fa-eye {
+    vertical-align: middle;
+  }
+}
+
+/* --- 11.4 GÅVOKORTSSIDAN /c/… — arket som ett kort, i sann storlek -------
+   Fasen centrerar kort och knapp i vyn. Fasen ligger utanför det html2pdf
+   fotograferar, så inget här syns i filen. --uc-k (visningsskalan) sätts
+   av gåvokortssidans script. */
+
+body:has(#phase-coupon-landing) {
+  --uc-blad-h: 1100px;
+}
+
+body:has(#phase-coupon-landing) #wrap-default,
+body:has(#phase-coupon-landing) .content-wrapper {
+  display: block !important;
+  width: 794px !important;
+  max-width: none !important;
+  min-height: 0 !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+}
+
+body:has(#phase-coupon-landing) #phase-coupon-landing {
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh !important;
+  width: 794px !important;
+  max-width: none !important;
+  margin: 0 auto !important;
+  padding: 40px 0 !important;
+  box-sizing: border-box;
+}
+
+/* Arket */
+body:has(#phase-coupon-landing) #wrapper {
+  width: 794px !important;
+  max-width: none !important;
+  height: var(--uc-blad-h) !important;
+  min-height: 0 !important;
+  max-height: var(--uc-blad-h) !important;
+  flex: 0 0 auto;
+  margin: 0 auto !important;
+  box-sizing: border-box !important;
+  aspect-ratio: auto !important;
+  clip-path: none !important;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #FFFFFF;
+  /* Visningsskalning. Layouten är oförändrad, bara ritningen krymper.
+     Den negativa marginalen tar bort höjden transformen inte krymper. */
+  transform: scale(var(--uc-k, 1));
+  transform-origin: top center;
+  margin-bottom: calc(var(--uc-blad-h) * var(--uc-k, 1) - var(--uc-blad-h)) !important;
+  box-shadow: 0 14px 36px rgba(40, 40, 38, .12);
+}
+
+/* CTA:n, som scriptet flyttat ut ur arket. Ligger utanför transformen. */
+body:has(#phase-coupon-landing) #phase-coupon-landing > #coupon-landing-show-pdf {
+  flex: 0 0 auto;
+  margin: 32px 0 0;
+  text-align: center;
+}
+
+/* --- 11.4b SMALA SKÄRMAR — arket centreras en gång ------------------------
+   Behållarna är vyns bredd, arket centreras EN gång med sin egen marginal
+   (nästlade marginaler räknas kumulativt och sköt förr ut arket ur vyn),
+   och transform-origin: top center krymper det mot vyns mitt. */
+
+@media (max-width: 833px) {
+
+  html:has(#phase-coupon-landing),
+  body:has(#phase-coupon-landing) {
+    overflow-x: hidden;
+  }
+
+  body:has(#phase-coupon-landing) #wrap-default,
+  body:has(#phase-coupon-landing) .content-wrapper,
+  body:has(#phase-coupon-landing) #phase-coupon-landing {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  body:has(#phase-coupon-landing) #phase-coupon-landing {
+    display: block !important;
+    min-height: 0 !important;
+    padding: 16px 0 40px !important;
+  }
+
+  /* 100% är vyns bredd. På 390px blir det -202px, en gång. */
+  body:has(#phase-coupon-landing) #wrapper {
+    margin-left: calc((100% - 794px) / 2) !important;
+    margin-right: 0 !important;
+  }
+}
+
+/* --- 11.5 RENDERINGSLÄGE — allt utom arket plattas ut under fotograferingen
+   body.uc-pdf-render sätts och tas bort av gåvokortssidans script vid klick
+   på nedladdning. Den fotograferade höjden måste vara exakt arkets: allt
+   över 1123px blir en tom sida två. :has() krävs för att slå 11.4. */
+
+body.uc-pdf-render:has(#phase-coupon-landing) {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+body.uc-pdf-render:has(#phase-coupon-landing) #wrap-default,
+body.uc-pdf-render:has(#phase-coupon-landing) .content-wrapper,
+body.uc-pdf-render:has(#phase-coupon-landing) #phase-coupon-landing {
+  display: block !important;
+  width: 794px !important;
+  min-width: 794px !important;
+  max-width: 794px !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+}
+
+body.uc-pdf-render:has(#phase-coupon-landing) #wrapper {
+  transform: none !important;
+  margin: 0 !important;
+}
+
+body.uc-pdf-render:has(#phase-coupon-landing) #coupon-landing-show-pdf {
+  display: none !important;
+}
+
+/* ==========================================================================
+   11.6 HÄLSNINGSFÄLTET OCH FÖRSLAGEN
+   Adoveos #message är en input type="text" och kan inte bära radbrytningar.
+   Scriptet speglar därför en egen textarea (#uc-halsning) mot den dolda
+   inputen. Förslagen och texterna ligger i scriptet (KAMPANJER).
+   ========================================================================== */
+
+#uc-halsning {
+  resize: none;
+  overflow: hidden;
+  min-height: 52px;
+  line-height: 1.4;
+}
+
+/* Adoveos input ligger kvar i formuläret men osynlig. Aldrig display:none,
+   det riskerar att validerare hoppar över fältet. */
+#message.uc-dold {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Räknaren: tyst tills det börjar ta slut */
+.uc-rakn {
+  display: none;
+  margin: -4px 0 8px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #6f6f68;
+}
+.uc-rakn.uc-syns { display: block; }
+.uc-rakn.uc-slut { color: #282826; }
+
+/* Förslagslistan */
+.uc-forslag { margin: -2px 0 14px; }
+
+.uc-forslag-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: none;
+  border: 0;
+  padding: 4px 0;
+  font-size: 14px;
+  color: #282826;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  cursor: pointer;
+}
+.uc-forslag-trigger .uc-pil {
+  width: 7px;
+  height: 7px;
+  border-right: 1.5px solid #282826;
+  border-bottom: 1.5px solid #282826;
+  transform: rotate(45deg) translate(-2px, -2px);
+  transition: transform .18s ease;
+}
+.uc-forslag-trigger[aria-expanded="true"] .uc-pil {
+  transform: rotate(-135deg) translate(-2px, -2px);
+}
+
+.uc-forslag-lista { display: none; margin: 10px 0 0; }
+.uc-forslag-lista.uc-oppen { display: block; }
+
+.uc-vers {
+  display: block;
+  width: 100%;
+  text-align: left;
+  box-sizing: border-box;
+  background: transparent;
+  border: 0;
+  border-left: 2px solid #d8d2ba;
+  border-radius: 0;
+  padding: 11px 12px 12px 14px;
+  margin: 0 0 6px;
+  cursor: pointer;
+  transition: border-color .15s ease, background .15s ease;
+}
+.uc-vers:hover,
+.uc-vers:focus-visible {
+  border-left-color: #8BEEA5;
+  background: rgba(139, 238, 165, .16);
+  outline: none;
+}
+.uc-vers .uc-text {
+  display: block;
+  font-size: 15px;
+  line-height: 1.42;
+}
+.uc-vers .uc-poet {
+  display: block;
+  margin-top: 6px;
+  font-size: 11px;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: #6f6f68;
+}
+
+/* Spökskrift på arket: tomma fält och råa shortcodes. Klassen sätts av
+   scriptet. Ska synas men inte läsas som ifylld text. */
+.uc-ghost { opacity: .45; }

@@ -1,5 +1,7 @@
-// Bygger dist/uc-p2p.css och dist/uc-p2p.js av filerna i src/, och
+// Bygger paketen i BUNDLES nedan (dist/<namn>.css + dist/<namn>.js) och
 // kopierar src/assets/* (bilder) till dist/.
+//   uc-p2p       src/css/*.css           + src/js/uc-p2p.js           (P2P-sidorna)
+//   uc-gavokort  src/gavokort/css/*.css  + src/gavokort/js/uc-gavokort.js (gåvokortskampanjerna)
 // Körs automatiskt av GitHub Actions vid varje ändring (se .github/workflows).
 // Lokalt: node build/build.mjs   (inga beroenden behövs)
 //
@@ -131,26 +133,33 @@ function transform(css) {
 }
 
 // ---------- bygg ----------
-const cssFiles = readdirSync(join(SRC, 'css')).filter(f => f.endsWith('.css')).sort();
-let css = cssFiles.map(f => `\n/* ===== src/css/${f} ===== */\n` + readFileSync(join(SRC, 'css', f), 'utf8')).join('\n');
-css = css.replace(/@@([A-Z0-9_-]+)@@/g, (m, n) => {
-  if (!icons[n]) throw new Error(`Ikonen ${m} saknas i src/icons/`);
-  return icons[n];
-});
-css = transform(css);
-
-const js = readFileSync(join(SRC, 'js', 'uc-p2p.js'), 'utf8');
+const BUNDLES = [
+  { name: 'uc-p2p',      css: 'css',          js: 'js/uc-p2p.js' },
+  { name: 'uc-gavokort', css: 'gavokort/css', js: 'gavokort/js/uc-gavokort.js' }
+];
 
 mkdirSync(OUT, { recursive: true });
-writeFileSync(join(OUT, 'uc-p2p.css'), banner('uc-p2p.css') + css);
-writeFileSync(join(OUT, 'uc-p2p.js'), banner('uc-p2p.js') + js);
+const built = [];
+for (const b of BUNDLES) {
+  const cssFiles = readdirSync(join(SRC, b.css)).filter(f => f.endsWith('.css')).sort();
+  let css = cssFiles.map(f => `\n/* ===== src/${b.css}/${f} ===== */\n` + readFileSync(join(SRC, b.css, f), 'utf8')).join('\n');
+  css = css.replace(/@@([A-Z0-9_-]+)@@/g, (m, n) => {
+    if (!icons[n]) throw new Error(`Ikonen ${m} saknas i src/icons/`);
+    return icons[n];
+  });
+  css = transform(css);
+  const js = readFileSync(join(SRC, b.js), 'utf8');
+  writeFileSync(join(OUT, b.name + '.css'), banner(b.name + '.css') + css);
+  writeFileSync(join(OUT, b.name + '.js'), banner(b.name + '.js') + js);
+  built.push(`${b.name}: ${cssFiles.join(', ')} (${css.length} tecken)`);
+}
 // Bilder och annat som sidorna laddar direkt (t.ex. hjärtat i Summary-heron)
 const ASSETS = join(SRC, 'assets');
 const assets = existsSync(ASSETS) ? readdirSync(ASSETS).filter(f => !f.startsWith('.')) : [];
 assets.forEach(f => copyFileSync(join(ASSETS, f), join(OUT, f)));
 writeFileSync(join(OUT, 'index.html'),
-  '<!doctype html><meta charset="utf-8"><title>Ung Cancer P2P — filer</title>' +
-  '<p>Filerna som laddas på Ung Cancers P2P-sidor på Adoveo:</p><ul>' +
-  '<li><a href="uc-p2p.css">uc-p2p.css</a></li><li><a href="uc-p2p.js">uc-p2p.js</a></li></ul>' +
+  '<!doctype html><meta charset="utf-8"><title>Ung Cancer på Adoveo — filer</title>' +
+  '<p>Filerna som laddas på Ung Cancers sidor på Adoveo:</p><ul>' +
+  BUNDLES.map(b => `<li><a href="${b.name}.css">${b.name}.css</a> + <a href="${b.name}.js">${b.name}.js</a></li>`).join('') + '</ul>' +
   `<p>Byggd ${stamp}, ${sha}. Källa: <a href="https://github.com/ungcancer-prod/adoveo-p2p">github.com/ungcancer-prod/adoveo-p2p</a></p>\n`);
-console.log(`Byggt: ${cssFiles.join(', ')} -> dist/uc-p2p.css (${css.length} tecken), dist/uc-p2p.js` + (assets.length ? `, ${assets.join(', ')}` : ''));
+console.log('Byggt:\n  ' + built.join('\n  ') + (assets.length ? `\n  assets: ${assets.join(', ')}` : ''));
