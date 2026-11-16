@@ -42,6 +42,7 @@ kontrollera efteråt.
 | Rubriker, texter, fältetiketter | ligger i Adoveo, dokumenterade i `adoveo/inputfalt/` |
 | **Gåvokort:** typografi, knappar, beloppsknappar | `src/gavokort/css/01-bas.css` |
 | **Gåvokort:** arket (förhandsvisning, gåvokortssida, PDF-läge), hälsningsfältet | `src/gavokort/css/02-ark.css` |
+| **Gåvokort:** julkortet i 311 (bilden, hälsningens plats och typografi) | `src/gavokort/css/03-julkort.css`, bilden `src/assets/julgava-311.jpg` |
 | **Gåvokort:** texter i scriptet (spökskrift, hälsningsförslag, knappar) | `KAMPANJER` i `src/gavokort/js/uc-gavokort.js` |
 
 `dist/` skapas av bygget och ska inte ändras — den finns inte ens i repot.

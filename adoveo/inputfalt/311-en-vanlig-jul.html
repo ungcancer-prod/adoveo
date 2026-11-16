@@ -5,8 +5,8 @@
   bredvid -> Swish -> SMS med länk till gåvokortssidan /c/… med PDF.
   Kod: uc-gavokort.css/.js, se adoveo/kampanjer.md.
 
-  STATUS 2026-11-13: allt nedan är 300:s innehåll som det ligger i 311
-  idag. Julcopyn är inte skriven. Byt texten fält för fält, och lägg
+  STATUS 2026-11-16: Giftcards-steget är julkortet. Products och Form är
+  fortfarande 300:s innehåll. Julcopyn är inte skriven. Byt texten fält för fält, och lägg
   scriptets texter (spökskrift, hälsningsförslag, knappar) i KAMPANJER
   ['311'] i src/gavokort/js/uc-gavokort.js.
 
@@ -87,29 +87,27 @@ När du ger en gåva kommer dina uppgifter att behandlas av Ung Cancer.
 
 <!-- ======================================================================
      GIFTCARDS (arket: förhandsvisningen i formuläret och gåvokortssidan)
-     Tre block, i den ordning de står på arket.
+     Julkortet. Hela kortet är en bild som CSS:en lägger som bakgrund
+     (src/assets/julgava-311.jpg, sektion 12 i src/gavokort/css/03-julkort.css).
+     I Adoveo ligger bara hälsningen och avsändaren. Inlagt 2026-11-16.
      ====================================================================== -->
 
-<!-- Block 1 (#coupon-page-title) -->
-<h3>Till minne av</h3>
-<h1>{receiver_name}</h1>
-<p class="uc-subtitle">har Ung Cancer tacksamt tagit emot en gåva</p>
-<br>
-<img src="https://content.adoveodemo.com/1788246670954_ungcancerheart260901dl.png" style="max-width: 20%;">
+<!-- Heading (#coupon-page-title): TOMT -->
 
-<!-- Block 2 (#coupon-page-message) -->
-<blockquote>{message}</blockquote>
-<cite>{sender_name}</cite>
+<!-- Description (#coupon-page-message). Klassen uc-julkort slår på julkortet. -->
+<div class="uc-julkort"><blockquote>{message}</blockquote><cite>{sender_name}</cite></div>
 
-<!-- Block 3 (#coupon-landing-message-text) -->
-<img src="https://content.adoveodemo.com/1788234576404_ungcancerlogotypsvart800x800260901dl.png" style="max-width: 20%;">
+<!-- Bottom text (#coupon-landing-message-text): TOMT -->
 
-<!-- Under arket i förhandsvisningen -->
-<p style="font-size: 16px; margin: 0 auto; text-align: center; ">Behöver du hjälp? Kontakta Ung Cancer via <a href="mailto:givarservice@ungcancer.se">givarservice@ungcancer.se</a> eller 010-70 79 670</p>
+<!-- PDF Button text -->
+Ladda ner PDF
 
-<!-- Custom script for this step: gåvokortssidans script (visningsskala
-     --uc-k, flyttar ut nedladdningsknappen, body.uc-pdf-render vid klick).
-     Ligger kvar i Adoveo tills det är flyttat in i uc-gavokort.js. -->
+<!-- Scriptet för gåvokortssidan (uc-blad, kopierat från 300) ligger kvar i
+     Adoveo men behövs inte längre: samma kod finns i uc-gavokort.js och de
+     delar lås, så bara det ena körs. Kan tömmas. -->
+
+<!-- {receiver_name} visas inte på julkortet. Fältet "Till minne av" i
+     formuläret (Receiver Name) fyller alltså ingen funktion på kortet. -->
 
 
 <!-- ======================================================================

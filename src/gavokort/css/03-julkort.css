@@ -41,7 +41,7 @@ body:has(#phase-coupon-landing) #wrapper:has(.uc-julkort) > *:not(:has(.uc-julko
   position: absolute;
   left: 97px;
   right: 97px;
-  top: 652px;
+  top: 644px;
   height: 200px;
   display: flex;
   flex-direction: column;

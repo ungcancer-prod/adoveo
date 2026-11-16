@@ -75,8 +75,13 @@ laddas inte där.
 SVG:n `#shape-box` ritas av scriptet och kan tas bort ur Head Markup.
 
 Ska vara tomma: Theme → Custom CSS (Desktop/Mobile också) och Form-stegets
-**Custom script for this step**. Giftcards-stegets script (gåvokortssidan)
-ligger kvar i Adoveo tills vidare.
+**Custom script for this step**. Även gåvokortssidans script (uc-blad) finns
+nu i paketet, så det som ligger kvar i Adoveo kan tömmas.
+
+**Arkets utseende** styrs av Giftcards-stegets innehåll. 311 har julkortet:
+mittblocket (Description) är `<div class="uc-julkort">…</div>`, och då lägger
+CSS:en kortets bild som bakgrund (sektion 12, bilden i `src/assets/`). Utan
+den klassen blir arket det vita bladet från 300.
 
 Texterna som scriptet skriver (spökskrift på arket, hälsningsförslagen,
 knapparna) ligger per kampanj i `KAMPANJER` i `src/gavokort/js/uc-gavokort.js`.
