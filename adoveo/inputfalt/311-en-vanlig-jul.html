@@ -102,9 +102,9 @@ När du ger en gåva kommer dina uppgifter att behandlas av Ung Cancer.
 <!-- PDF Button text -->
 Ladda ner PDF
 
-<!-- Scriptet för gåvokortssidan (uc-blad, kopierat från 300) ligger kvar i
-     Adoveo men behövs inte längre: samma kod finns i uc-gavokort.js och de
-     delar lås, så bara det ena körs. Kan tömmas. -->
+<!-- Custom script för gåvokortssidan: TOMT sedan 2026-11-16. Koden finns i
+     uc-gavokort.js (avsnitt 4). Läggs det gamla scriptet (uc-blad från 300)
+     tillbaka tar det över, och kortet byter då storlek vid scroll på mobil. -->
 
 <!-- {receiver_name} visas inte på julkortet. Fältet "Till minne av" i
      formuläret (Receiver Name) fyller alltså ingen funktion på kortet. -->
@@ -112,12 +112,6 @@ Ladda ner PDF
 
 <!-- ======================================================================
      END PAGE (tacksidan)
-     Rubriken och texten skrivs i Adoveo. EN rad i texten behövs av koden
-     och ska stå kvar, överst i fältet för texten (transaction_message):
+     Rubriken och texten skrivs i Adoveo. Koden lägger bara till stegraden
+     ovanför rubriken.
      ====================================================================== -->
-
-<span class="uc-tack-data" hidden><q>{message}</q><b>{sender_name}</b></span>
-
-<!-- Raden syns inte. Scriptet läser hälsningen och namnet ur den och visar
-     gåvokortet med snöre och rosett under rubriken. Tas raden bort visas
-     inget kort på tacksidan. -->

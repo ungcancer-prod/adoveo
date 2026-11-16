@@ -17,8 +17,8 @@
       formuläret och på tacksidan.
    6. Kortet redan i steg 1: en bild av gåvokortet på landningssidan.
    7. Snöfall i bakgrunden.
-   8. Juldekor: snö på kanterna, snöret med rosett på tacksidan och
-      gåvokortssidan, tacksidans kort och dela-knappen.
+   8. Juldekor: snöret med rosett som löses upp på gåvokortssidan, och
+      dela-knappen där.
 
    VANLIGASTE ÄNDRINGEN: texterna. De ligger per kampanj i KAMPANJER nedan.
    Ingen emoji någonstans i den här filen eller i Adoveo.
@@ -53,7 +53,7 @@
       { text: 'Man ser bara rätt med hjärtat. Det viktigaste är osynligt för ögonen.', poet: 'Antoine de Saint-Exupéry' }
     ],
     forhandsvisa: 'Se minnesbladet',
-    jul: false,              /* juldekor: snö på kanterna, etikett, ljuslåga, snöre (CSS sektion 15) */
+    jul: false,              /* juldekor: ljuslågan och snöret på gåvokortssidan (CSS sektion 15) */
     delaKnapp: null,         /* dela-knapp på gåvokortssidan, t.ex. { text: 'Dela gåvokortet', kopierat: 'Länken är kopierad' } */
     sno: false,              /* snöfall i bakgrunden */
     kortvisning: null,       /* kortet redan i steg 1, t.ex. { text: 'Rad vid kortet' }. null = inget */
@@ -373,7 +373,6 @@
     grupp.insertBefore(ta, inp);
 
     var holk = document.createElement('div');
-    holk.className = 'uc-holk';
 
     rakn = document.createElement('div');
     rakn.id = 'uc-rakn';
@@ -444,9 +443,14 @@
 
   function fit() {
     if (!onLanding()) { return false; }
-    var k = Math.min(1, (window.innerHeight - RESERV) / BLAD_H);
+    var k;
     if (window.innerWidth < BLAD_W + 40) {
-      k = Math.min(k, (window.innerWidth - 32) / BLAD_W);
+      /* Smal skärm: arket fyller bredden. Höjden räknas inte in, för på
+         mobil ändras den när adressfältet visas och göms vid scroll, och
+         då skulle kortet byta storlek. */
+      k = (window.innerWidth - 32) / BLAD_W;
+    } else {
+      k = Math.min(1, (window.innerHeight - RESERV) / BLAD_H);
     }
     k = Math.max(k, 0.2);
     document.documentElement.style.setProperty('--uc-k', k);
@@ -728,10 +732,9 @@
      göra själv. */
   var SVG_NS = 'http://www.w3.org/2000/svg';
 
-  /* Snöret med rosett över kortet. Måtten är arkets (794 x 1100), så
-     samma teckning passar kortet i alla storlekar. Linjerna går där bilden
-     är tom: till höger om paketen och mellan logotypen och rubriken.
-     lage: 'knyt' ritar upp det, 'los' drar tillbaka det. */
+  /* Snöret med rosett över kortet. Måtten är arkets (794 x 1100).
+     Linjerna går där bilden är tom: till höger om paketen och mellan
+     logotypen och rubriken. lage 'los' drar tillbaka snöret (CSS 15.2). */
   var SNORE = [
     ['l1', 'M700 -6 C694 280 707 720 699 1106'],
     ['l2', 'M-6 180 C250 172 560 186 800 175'],
@@ -762,80 +765,6 @@
     return svg;
   }
 
-  /* Snön på ytornas överkant. Ytan har clip-path och gåvokortssidans ark
-     overflow: hidden, så drivan ligger i ett eget element i fasen och
-     placeras efter ytans läge. Körs om, eftersom ytan byter storlek. */
-  var SNOKANT = [
-    ['phase-swish-products', '.wrapper'],
-    ['phase-swish-form', '.wrapper'],
-    ['phase-swish-result', '.wrapper'],
-    ['phase-coupon-landing', '#wrapper']
-  ];
-  function snokanter() {
-    SNOKANT.forEach(function (p) {
-      var fas = document.getElementById(p[0]);
-      if (!fas) { return; }
-      var yta = fas.querySelector(p[1]);
-      var kant = null;
-      for (var i = 0; i !== fas.children.length; i++) {
-        if (fas.children[i].className === 'uc-snokant') { kant = fas.children[i]; }
-      }
-      if (!yta) { return; }
-      var r = yta.getBoundingClientRect();
-      if (!r.width || !r.height) { if (kant) { kant.style.display = 'none'; } return; }
-      if (!kant) {
-        kant = document.createElement('div');
-        kant.className = 'uc-snokant';
-        kant.setAttribute('aria-hidden', 'true');
-        fas.appendChild(kant);
-      }
-      var f = fas.getBoundingClientRect();
-      kant.style.display = '';
-      kant.style.left = Math.round(r.left - f.left - 4) + 'px';
-      kant.style.top = Math.round(r.top - f.top - 13) + 'px';
-      kant.style.width = Math.round(r.width + 8) + 'px';
-    });
-  }
-
-  /* Tacksidan: kortet med givarens hälsning, och snöret som knyts.
-     Hälsningen och namnet kommer från End Page-texten i Adoveo, där de
-     står i ett dolt element:
-       <span class="uc-tack-data" hidden><q>{message}</q><b>{sender_name}</b></span>
-     Saknas elementet visas inget kort. */
-  function tackKort() {
-    var data = document.querySelector('#phase-swish-result .uc-tack-data');
-    if (!data || document.querySelector('.uc-kort1--tack')) { return; }
-    var q = data.querySelector('q'), b = data.querySelector('b');
-    var halsning = q ? q.textContent.trim() : '';
-    var namn = b ? b.textContent.trim() : '';
-    /* En shortcode som inte fyllts i står kvar som {message} */
-    if (halsning.charAt(0) === '{') { halsning = ''; }
-    if (namn.charAt(0) === '{') { namn = ''; }
-
-    var fig = document.createElement('figure');
-    fig.className = 'uc-kort1 uc-kort1--tack';
-    var ark = document.createElement('div');
-    ark.className = 'uc-kort1__ark';
-    ark.setAttribute('role', 'img');
-    ark.setAttribute('aria-label', 'Ditt gåvokort');
-    var inre = document.createElement('div');
-    inre.className = 'uc-julkort';
-    var bq = document.createElement('blockquote');
-    bq.textContent = halsning;
-    var cite = document.createElement('cite');
-    cite.textContent = namn;
-    inre.appendChild(bq);
-    inre.appendChild(cite);
-    ark.appendChild(inre);
-    ark.appendChild(snore('knyt'));
-    fig.appendChild(ark);
-
-    var fas = document.getElementById('phase-swish-result');
-    var rubrik = fas.querySelector('.page-title');
-    if (rubrik) { rubrik.parentNode.insertBefore(fig, rubrik.nextSibling); }
-    else { data.parentNode.insertBefore(fig, data); }
-  }
-
   /* Gåvokortssidan: snöret ligger knutet över kortet när sidan öppnas och
      löses upp. Elementet tas bort efteråt, så att arket är rent. */
   function losSnore() {
@@ -856,9 +785,9 @@
     var pdf = document.getElementById('coupon-landing-show-pdf');
     if (!fas || !pdf) { return false; }
     if (document.getElementById('uc-dela')) { return true; }
-    /* Knappen ska stå under nedladdningsknappen, som först ska ha flyttats
-       ut ur arket (pdfKnapp). Egen rad: klick i nedladdningsknappens rad
-       slår på renderingsläget. */
+    /* Knappen ska stå före nedladdningslänken, som först ska ha flyttats
+       ut ur arket (pdfKnapp). Egen rad: klick i nedladdningens rad slår
+       på renderingsläget. */
     if (pdf.parentElement !== fas && !vantaInte) { return false; }
     var knapp = document.createElement('button');
     knapp.type = 'button';
@@ -886,27 +815,14 @@
     var rad = document.createElement('div');
     rad.className = 'uc-dela-rad';
     rad.appendChild(knapp);
-    if (pdf.parentElement === fas) { fas.insertBefore(rad, pdf.nextSibling); }
+    if (pdf.parentElement === fas) { fas.insertBefore(rad, pdf); }
     else { fas.appendChild(rad); }
     return true;
   }
 
   function jul() {
     if (!T.jul) { return; }
-    var root = document.documentElement;
-    root.classList.add('uc-jul');
-    /* Ytans färg, till hålet i etiketten */
-    var yta = document.querySelector('#phase-swish-products .wrapper, #phase-swish-form .wrapper, #phase-swish-result .wrapper');
-    if (yta) { root.style.setProperty('--uc-yta', getComputedStyle(yta).backgroundColor); }
-
-    var varv = function () {
-      snokanter();
-      tackKort();
-    };
-    varv();
-    setInterval(varv, 300);
-    window.addEventListener('resize', snokanter);
-    document.addEventListener('click', function () { setTimeout(snokanter, 0); setTimeout(snokanter, 80); }, true);
+    document.documentElement.classList.add('uc-jul');
 
     /* Gåvokortssidan ritas ibland efter DOMContentLoaded: försök en stund. */
     if (document.body.classList.contains('coupon-landing') || document.getElementById('phase-coupon-landing')) {
