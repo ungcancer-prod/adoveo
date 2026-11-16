@@ -15,6 +15,7 @@
       ur arket, och renderingsläget när PDF:en skapas.
    5. Stegraden (1 Välj belopp, 2 Skapa, 3 Dela) på landningssidan, i
       formuläret och på tacksidan.
+   6. Kortet redan i steg 1: en bild av gåvokortet på landningssidan.
 
    VANLIGASTE ÄNDRINGEN: texterna. De ligger per kampanj i KAMPANJER nedan.
    Ingen emoji någonstans i den här filen eller i Adoveo.
@@ -49,6 +50,7 @@
       { text: 'Man ser bara rätt med hjärtat. Det viktigaste är osynligt för ögonen.', poet: 'Antoine de Saint-Exupéry' }
     ],
     forhandsvisa: 'Se minnesbladet',
+    kortvisning: null,       /* kortet redan i steg 1, t.ex. { text: 'Rad vid kortet' }. null = inget */
     steg: null,              /* stegraden, t.ex. ['Välj belopp', 'Skapa', 'Dela']. null = ingen */
     maxHalsning: 300,        /* teckentak. Uppmätt i 300: strax över tappar arket sin luft */
     raknareKvar: 'Ungefär {n} tecken kvar.',
@@ -69,6 +71,7 @@
       forslag: [],
       forhandsvisa: 'Se gåvokortet',
       steg: ['Välj belopp', 'Skapa', 'Dela'],
+      kortvisning: { text: 'Gåvokortet är ritat av Sandra, medlem i Ung Cancer' },
       maxHalsning: 240
     }
   };
@@ -549,12 +552,68 @@
     setInterval(satt, 700);
   }
 
+  /* ---------- 6. kortet redan i steg 1 ---------- */
+  /* Visar gåvokortet på landningssidan, innan man valt belopp. Utseendet i
+     CSS sektion 12.1. Två exemplar byggs: ett i den röda ytan under
+     beloppsknapparna (mobil) och ett bredvid ytan (desktop). CSS visar det
+     ena eller det andra. */
+  function kortFigur(lage) {
+    var fig = document.createElement('figure');
+    fig.className = 'uc-kort1 uc-kort1--' + lage;
+    var text = document.createElement('figcaption');
+    text.className = 'uc-kort1__text';
+    text.textContent = T.kortvisning.text || '';
+    var ark = document.createElement('div');
+    ark.className = 'uc-kort1__ark';
+    ark.setAttribute('role', 'img');
+    ark.setAttribute('aria-label', 'Gåvokortet, med plats för din hälsning och ditt namn');
+    var inre = document.createElement('div');
+    inre.className = 'uc-julkort';
+    inre.setAttribute('aria-hidden', 'true');
+    var bq = document.createElement('blockquote');
+    bq.className = 'uc-ghost';
+    bq.textContent = T.taggar.BLOCKQUOTE;
+    var cite = document.createElement('cite');
+    cite.className = 'uc-ghost';
+    cite.textContent = T.taggar.CITE;
+    inre.appendChild(bq);
+    inre.appendChild(cite);
+    ark.appendChild(inre);
+    /* Mobil: texten ovanför kortet. Desktop: under, så att kortet står på
+       samma höjd som arket i steg 2. */
+    if (lage === 'mobil') { fig.appendChild(text); fig.appendChild(ark); }
+    else { fig.appendChild(ark); fig.appendChild(text); }
+    return fig;
+  }
+
+  function kortvisning() {
+    if (!T.kortvisning) { return; }
+    var satt = function () {
+      var fas = document.getElementById('phase-swish-products');
+      if (!fas) { return; }
+      var yta = fas.querySelector('.wrapper');
+      if (yta && !fas.querySelector('.uc-kort1--mobil')) {
+        var under = yta.querySelector('.swish-below-text');
+        if (under) { under.parentNode.insertBefore(kortFigur('mobil'), under); }
+      }
+      if (yta && !fas.querySelector('.uc-kort1--desktop')) {
+        fas.insertBefore(kortFigur('desktop'), yta.nextSibling);
+      }
+      /* Klassen styr den breda uppställningen och ska bara sitta när steg 1 syns. */
+      var syns = getComputedStyle(fas).display !== 'none';
+      document.body.classList.toggle('uc-kort1-steg', syns);
+    };
+    satt();
+    setInterval(satt, 300);
+    document.addEventListener('click', function () { setTimeout(satt, 0); setTimeout(satt, 60); }, true);
+  }
+
   /* ---------- start ---------- */
   function boot() {
     T = texter(kampanjId());
     document.documentElement.style.setProperty('--uc-preview-label', JSON.stringify(T.forhandsvisa));
     /* Varje del för sig, så att en krasch inte stoppar resten. */
-    [shapes, formStep, halsning, blad, stegrad].forEach(function (fn) {
+    [shapes, formStep, halsning, blad, stegrad, kortvisning].forEach(function (fn) {
       try { fn(); } catch (e) { console.error('[uc-gavokort]', fn.name, e); }
     });
     document.documentElement.classList.add('uc-gavokort');

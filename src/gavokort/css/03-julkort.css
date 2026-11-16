@@ -81,3 +81,92 @@ body:has(#phase-coupon-landing) #wrapper:has(.uc-julkort) > *:not(:has(.uc-julko
 body.uc-pdf-render:has(.uc-julkort) {
   background: #822530 !important;
 }
+
+/* --------------------------------------------------------------------------
+   12.1 KORTET REDAN I STEG 1 (landningssidan)
+   Byggs av scriptet (kortvisning) när kampanjen har "kortvisning" i
+   KAMPANJER. Samma bild som arket, med "Din hälsning" och "Ditt namn" i
+   spökskrift. Två exemplar, ett per läge:
+     mobil    i den röda ytan, under beloppsknapparna, texten ovanför kortet
+     desktop  bredvid den röda ytan, på samma plats som arket har i steg 2,
+              texten under kortet (så att kortet inte flyttar sig mellan stegen)
+   Måtten är procent och cqw av kortets bredd, omräknade från arkets
+   794 x 1100 px (sektion 12), så kortet ser likadant ut i alla storlekar.
+   -------------------------------------------------------------------------- */
+.uc-kort1 {
+  margin: 0;
+  clear: both;   /* beloppsknapparna flyter */
+}
+.uc-kort1__text {
+  margin: 0 0 12px;
+  font-family: Customfont2, Adoveo, sans-serif;
+  font-size: 16px;
+  line-height: 1.3;
+  text-align: center;
+  text-transform: none;
+}
+.uc-kort1__ark {
+  position: relative;
+  container-type: inline-size;
+  aspect-ratio: 794 / 1100;
+  background: #822530 url("julgava-311.jpg") center / 100% auto no-repeat;
+  box-shadow: 0 14px 36px rgba(40, 40, 38, .12);
+  color: #FCF7E3;
+}
+.uc-kort1__ark .uc-julkort {
+  left: 12.2%;
+  right: 12.2%;
+  top: 58.5%;
+  height: 18.2%;
+  gap: 1.76cqw;
+}
+.uc-kort1__ark .uc-julkort blockquote { font-size: 2.77cqw; }
+.uc-kort1__ark .uc-julkort cite { font-size: 2.02cqw; }
+
+.uc-kort1--mobil {
+  max-width: 300px;
+  margin: 32px auto 0;
+}
+
+@media (max-width: 899px) {
+  .uc-kort1--desktop { display: none; }
+}
+
+@media (min-width: 900px) {
+  .uc-kort1--mobil { display: none; }
+
+  /* Samma uppställning som formulärsteget (11.2): ytan 390px, kortet 420px.
+     body.uc-kort1-steg sätts av scriptet när steg 1 visas. */
+  body.uc-kort1-steg #wrap-default {
+    width: 900px !important;
+    max-width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+  body.uc-kort1-steg .content-wrapper {
+    width: 100% !important;
+    max-width: none !important;
+  }
+  /* :not([style*="none"]) av samma skäl som i 11.2: Adoveo gömmer fasen inline */
+  body.uc-kort1-steg #phase-swish-products:not([style*="none"]) {
+    display: flex !important;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 48px;
+    width: 100% !important;
+    max-width: none !important;
+  }
+  body.uc-kort1-steg #phase-swish-products > .wrapper {
+    flex: 0 0 390px;
+  }
+  #phase-swish-products > .uc-kort1--desktop {
+    flex: 0 0 420px;
+    position: sticky;
+    top: 40px;
+    margin-top: 40px;
+  }
+  .uc-kort1--desktop .uc-kort1__text {
+    margin: 16px 0 0;
+    color: #282826;
+  }
+}
