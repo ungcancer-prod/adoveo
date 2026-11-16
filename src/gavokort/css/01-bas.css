@@ -260,9 +260,22 @@ button[name="swish-send"] {
   margin: 6px 3px;
   min-height: 0;   /* plattformen ger 49px */
 }
-button.cc-button-custom-product {
+/* Beloppsknapparna fyller sin tredjedel */
+.swish_product_row_1 button.cc-button-custom-product,
+.swish_product_row_2 button.cc-button-custom-product,
+.swish_product_row_3 button.cc-button-custom-product {
   width: 100%;
   max-width: 100%;
+}
+/* Knappen under "valfritt belopp" (CTA:n) är lika bred som sin text och
+   centrerad, som övriga knappar. Plattformen ger den full bredd. */
+.swish_product_row_4 button.cc-button-custom-product {
+  display: block;
+  width: -moz-fit-content;
+  width: fit-content;
+  max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
 }
 /* Fältet för valfritt belopp ska inte flyta in bredvid knapparna */
 .swish-below-text { clear: both; }
