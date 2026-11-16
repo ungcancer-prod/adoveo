@@ -8,7 +8,7 @@
      steg 3  tacksidan, ovanför rubriken
    Stegens namn står per kampanj i KAMPANJER (steg) i uc-gavokort.js.
    Bara pågående steg i full färg. Klart = blekt med bock, kommande = blekt
-   med siffra. Färgen följer ytans textfärg; --uc-step-bg (ytans färg, till
+   med siffra. Alltid svart (#282826); --uc-step-bg (ytans färg, till
    bocken) sätts av scriptet.
    ========================================================================== */
 .uc-progress {
@@ -20,7 +20,7 @@
   margin: 0 auto 32px;
   padding: 0;
   list-style: none;
-  color: inherit;
+  color: #282826;   /* alltid Ung Cancers svarta, oavsett ytans textfärg */
 }
 /* På landningssidan står raden mitt i innehållet, inte överst */
 #phase-swish-products .uc-progress { margin: 32px auto 20px; }
