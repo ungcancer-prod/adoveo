@@ -111,5 +111,13 @@ Ladda ner PDF
 
 
 <!-- ======================================================================
-     END PAGE (tacksidan) — ej inventerad
+     END PAGE (tacksidan)
+     Rubriken och texten skrivs i Adoveo. EN rad i texten behövs av koden
+     och ska stå kvar, överst i fältet för texten (transaction_message):
      ====================================================================== -->
+
+<span class="uc-tack-data" hidden><q>{message}</q><b>{sender_name}</b></span>
+
+<!-- Raden syns inte. Scriptet läser hälsningen och namnet ur den och visar
+     gåvokortet med snöre och rosett under rubriken. Tas raden bort visas
+     inget kort på tacksidan. -->
