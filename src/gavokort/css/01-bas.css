@@ -278,3 +278,9 @@ button.cc-button-custom-product {
   .swish-below-text { clear: none; }
 }
 .amount-qualifier-monthly, .amount-qualifier-onetime { margin-top: -8px; }
+
+/* ==========================================================================
+   Campaign footer ("Behöver du hjälp? ...") ligger direkt i body, på sidans
+   vita bakgrund, men ärver temats krämvita textfärg. Alltid svart.
+   ========================================================================== */
+body > p { color: #282826; }

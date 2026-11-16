@@ -357,9 +357,11 @@ body.uc-pdf-render:has(#phase-coupon-landing) #coupon-landing-show-pdf {
 /* Allt annat i body (Campaign footer med hjälptexten, radbrytningar) göms
    under fotograferingen. Uppmätt 2026-11-16: med footern blir body 1249px,
    alltså över sidbrytningen vid 1123, och PDF:en får en andra sida. */
-body.uc-pdf-render:has(#phase-coupon-landing) > *:not(#wrap-default) {
+body.uc-pdf-render:has(#phase-coupon-landing) > *:not(#wrap-default):not(.html2pdf__overlay):not(.html2pdf__container):not(.html2canvas-container) {
   display: none !important;
 }
+/* Undantagen är html2pdf:s egna arbetsytor, som läggs direkt i body under
+   fotograferingen. Göms de blir bilden 0px och ingen PDF skapas. */
 
 /* ==========================================================================
    11.6 HÄLSNINGSFÄLTET OCH FÖRSLAGEN
