@@ -791,9 +791,9 @@
       }
       var f = fas.getBoundingClientRect();
       kant.style.display = '';
-      kant.style.left = Math.round(r.left - f.left - 3) + 'px';
-      kant.style.top = Math.round(r.top - f.top - 11) + 'px';
-      kant.style.width = Math.round(r.width + 6) + 'px';
+      kant.style.left = Math.round(r.left - f.left - 4) + 'px';
+      kant.style.top = Math.round(r.top - f.top - 13) + 'px';
+      kant.style.width = Math.round(r.width + 8) + 'px';
     });
   }
 

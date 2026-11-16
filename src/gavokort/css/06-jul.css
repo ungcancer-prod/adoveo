@@ -18,7 +18,7 @@
    (snokanter), eftersom ytan har clip-path och arket overflow: hidden, som
    båda skulle klippa bort den. På korten räcker ett pseudo-element. */
 html.uc-jul {
-  --uc-snokant: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 24' preserveAspectRatio='none'%3E%3Cpath fill='%23fff' d='M0 20 L0 13 C18 6 40 4 60 9 C80 14 100 3 130 6 C160 9 172 15 200 11 C230 7 250 2 280 7 C310 12 330 5 360 8 C380 10 392 13 400 11 L400 18 C382 22 360 16 330 20 C300 24 280 15 250 19 C220 23 200 17 170 20 C140 23 120 16 90 19 C60 22 30 17 0 20 Z'/%3E%3C/svg%3E");
+  --uc-snokant: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 30' preserveAspectRatio='none'%3E%3Cpath fill='%23fff' d='M0 24 L0 15 C14 7 34 3 52 8 C66 12 78 16 96 10 C114 4 132 2 150 7 C166 11 176 17 196 13 C216 9 228 3 250 5 C272 7 284 15 304 12 C324 9 338 4 358 7 C376 10 390 14 400 12 L400 22 C388 27 372 20 352 24 C332 28 318 19 296 23 C274 27 262 30 240 25 C218 20 206 22 186 26 C166 30 150 21 128 24 C106 27 94 30 72 26 C50 22 38 21 20 25 C10 27 4 26 0 24 Z'/%3E%3C/svg%3E");
 }
 html.uc-jul #phase-swish-products,
 html.uc-jul #phase-swish-form,
@@ -26,30 +26,31 @@ html.uc-jul #phase-swish-result,
 html.uc-jul #phase-coupon-landing {
   position: relative;   /* ankare för .uc-snokant */
 }
-.uc-snokant,
+div.uc-snokant,
 html.uc-jul .uc-kort1__ark::before,
 html.uc-jul #giftcard-preview-container::before {
   content: '';
+  display: block;       /* plattformen gömmer tomma div:ar (div:empty) */
   position: absolute;
-  height: 22px;
+  height: 28px;
   background: var(--uc-snokant) center / 100% 100% no-repeat;
   filter: drop-shadow(0 2px 2px rgba(40, 40, 38, .16));   /* så att snön syns även mot den vita ytan */
   pointer-events: none;
   z-index: 2;
 }
 html.uc-jul .uc-kort1__ark::before {
-  left: -3px;
-  right: -3px;
-  top: -12px;
+  left: -4px;
+  right: -4px;
+  top: -15px;
 }
 /* Arket i formuläret: bara i det breda läget, där det står bredvid ytan */
 html.uc-jul #giftcard-preview-container::before { display: none; }
 @media (min-width: 900px) {
   html.uc-jul body.uc-form-step #phase-swish-form > #giftcard-preview-container::before {
     display: block;
-    left: -3px;
-    right: -3px;
-    top: -12px;
+    left: -4px;
+    right: -4px;
+    top: -15px;
   }
 }
 
