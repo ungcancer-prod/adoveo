@@ -17,6 +17,8 @@
       formuläret och på tacksidan.
    6. Kortet redan i steg 1: en bild av gåvokortet på landningssidan.
    7. Snöfall i bakgrunden.
+   8. Juldekor: snö på kanterna, snöret med rosett på tacksidan och
+      gåvokortssidan, tacksidans kort och dela-knappen.
 
    VANLIGASTE ÄNDRINGEN: texterna. De ligger per kampanj i KAMPANJER nedan.
    Ingen emoji någonstans i den här filen eller i Adoveo.
@@ -51,6 +53,8 @@
       { text: 'Man ser bara rätt med hjärtat. Det viktigaste är osynligt för ögonen.', poet: 'Antoine de Saint-Exupéry' }
     ],
     forhandsvisa: 'Se minnesbladet',
+    jul: false,              /* juldekor: snö på kanterna, etikett, ljuslåga, snöre (CSS sektion 15) */
+    delaKnapp: null,         /* dela-knapp på gåvokortssidan, t.ex. { text: 'Dela gåvokortet', kopierat: 'Länken är kopierad' } */
     sno: false,              /* snöfall i bakgrunden */
     kortvisning: null,       /* kortet redan i steg 1, t.ex. { text: 'Rad vid kortet' }. null = inget */
     steg: null,              /* stegraden, t.ex. ['Välj belopp', 'Skapa', 'Dela']. null = ingen */
@@ -74,6 +78,8 @@
       forhandsvisa: 'Se gåvokortet',
       steg: ['Välj belopp', 'Skapa', 'Dela'],
       sno: true,
+      jul: true,
+      delaKnapp: { text: 'Dela gåvokortet', kopierat: 'Länken är kopierad' },
       kortvisning: { text: 'Gåvokortet är ritat av Sandra, medlem i Ung Cancer' },
       maxHalsning: 240
     }
@@ -367,6 +373,7 @@
     grupp.insertBefore(ta, inp);
 
     var holk = document.createElement('div');
+    holk.className = 'uc-holk';
 
     rakn = document.createElement('div');
     rakn.id = 'uc-rakn';
@@ -716,12 +723,209 @@
     start();
   }
 
+  /* ---------- 8. juldekor ---------- */
+  /* Utseendet ligger i CSS sektion 15. Här byggs bara det som CSS inte kan
+     göra själv. */
+  var SVG_NS = 'http://www.w3.org/2000/svg';
+
+  /* Snöret med rosett över kortet. Måtten är arkets (794 x 1100), så
+     samma teckning passar kortet i alla storlekar. Linjerna går där bilden
+     är tom: till höger om paketen och mellan logotypen och rubriken.
+     lage: 'knyt' ritar upp det, 'los' drar tillbaka det. */
+  var SNORE = [
+    ['l1', 'M700 -6 C694 280 707 720 699 1106'],
+    ['l2', 'M-6 180 C250 172 560 186 800 175'],
+    ['b1 uc-snore__bage', 'M700 178 C668 120 606 118 612 158 C617 190 668 188 700 178'],
+    ['b2 uc-snore__bage', 'M700 178 C732 120 794 118 788 158 C783 190 732 188 700 178'],
+    ['s1 uc-snore__bage', 'M700 178 C690 206 676 228 656 246'],
+    ['s2 uc-snore__bage', 'M700 178 C712 208 728 228 748 244']
+  ];
+  function snore(lage) {
+    var svg = document.createElementNS(SVG_NS, 'svg');
+    svg.setAttribute('class', 'uc-snore uc-snore--' + lage);
+    svg.setAttribute('viewBox', '0 0 794 1100');
+    svg.setAttribute('aria-hidden', 'true');
+    SNORE.forEach(function (d) {
+      var path = document.createElementNS(SVG_NS, 'path');
+      path.setAttribute('class', 'uc-snore__' + d[0]);
+      path.setAttribute('d', d[1]);
+      path.setAttribute('pathLength', '1');
+      svg.appendChild(path);
+    });
+    var knut = document.createElementNS(SVG_NS, 'ellipse');
+    knut.setAttribute('class', 'uc-snore__knut');
+    knut.setAttribute('cx', '700');
+    knut.setAttribute('cy', '178');
+    knut.setAttribute('rx', '11');
+    knut.setAttribute('ry', '9');
+    svg.appendChild(knut);
+    return svg;
+  }
+
+  /* Snön på ytornas överkant. Ytan har clip-path och gåvokortssidans ark
+     overflow: hidden, så drivan ligger i ett eget element i fasen och
+     placeras efter ytans läge. Körs om, eftersom ytan byter storlek. */
+  var SNOKANT = [
+    ['phase-swish-products', '.wrapper'],
+    ['phase-swish-form', '.wrapper'],
+    ['phase-swish-result', '.wrapper'],
+    ['phase-coupon-landing', '#wrapper']
+  ];
+  function snokanter() {
+    SNOKANT.forEach(function (p) {
+      var fas = document.getElementById(p[0]);
+      if (!fas) { return; }
+      var yta = fas.querySelector(p[1]);
+      var kant = null;
+      for (var i = 0; i !== fas.children.length; i++) {
+        if (fas.children[i].className === 'uc-snokant') { kant = fas.children[i]; }
+      }
+      if (!yta) { return; }
+      var r = yta.getBoundingClientRect();
+      if (!r.width || !r.height) { if (kant) { kant.style.display = 'none'; } return; }
+      if (!kant) {
+        kant = document.createElement('div');
+        kant.className = 'uc-snokant';
+        kant.setAttribute('aria-hidden', 'true');
+        fas.appendChild(kant);
+      }
+      var f = fas.getBoundingClientRect();
+      kant.style.display = '';
+      kant.style.left = Math.round(r.left - f.left - 3) + 'px';
+      kant.style.top = Math.round(r.top - f.top - 11) + 'px';
+      kant.style.width = Math.round(r.width + 6) + 'px';
+    });
+  }
+
+  /* Tacksidan: kortet med givarens hälsning, och snöret som knyts.
+     Hälsningen och namnet kommer från End Page-texten i Adoveo, där de
+     står i ett dolt element:
+       <span class="uc-tack-data" hidden><q>{message}</q><b>{sender_name}</b></span>
+     Saknas elementet visas inget kort. */
+  function tackKort() {
+    var data = document.querySelector('#phase-swish-result .uc-tack-data');
+    if (!data || document.querySelector('.uc-kort1--tack')) { return; }
+    var q = data.querySelector('q'), b = data.querySelector('b');
+    var halsning = q ? q.textContent.trim() : '';
+    var namn = b ? b.textContent.trim() : '';
+    /* En shortcode som inte fyllts i står kvar som {message} */
+    if (halsning.charAt(0) === '{') { halsning = ''; }
+    if (namn.charAt(0) === '{') { namn = ''; }
+
+    var fig = document.createElement('figure');
+    fig.className = 'uc-kort1 uc-kort1--tack';
+    var ark = document.createElement('div');
+    ark.className = 'uc-kort1__ark';
+    ark.setAttribute('role', 'img');
+    ark.setAttribute('aria-label', 'Ditt gåvokort');
+    var inre = document.createElement('div');
+    inre.className = 'uc-julkort';
+    var bq = document.createElement('blockquote');
+    bq.textContent = halsning;
+    var cite = document.createElement('cite');
+    cite.textContent = namn;
+    inre.appendChild(bq);
+    inre.appendChild(cite);
+    ark.appendChild(inre);
+    ark.appendChild(snore('knyt'));
+    fig.appendChild(ark);
+
+    var fas = document.getElementById('phase-swish-result');
+    var rubrik = fas.querySelector('.page-title');
+    if (rubrik) { rubrik.parentNode.insertBefore(fig, rubrik.nextSibling); }
+    else { data.parentNode.insertBefore(fig, data); }
+  }
+
+  /* Gåvokortssidan: snöret ligger knutet över kortet när sidan öppnas och
+     löses upp. Elementet tas bort efteråt, så att arket är rent. */
+  function losSnore() {
+    var ark = document.querySelector('#phase-coupon-landing #wrapper');
+    if (!ark || !ark.querySelector('.uc-julkort') || ark.querySelector('.uc-snore')) { return false; }
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) { return true; }
+    var svg = snore('los');
+    ark.appendChild(svg);
+    setTimeout(function () { if (svg.parentNode) { svg.parentNode.removeChild(svg); } }, 3200);
+    return true;
+  }
+
+  /* Gåvokortssidan: knappen som delar länken till kortet. Telefonens egen
+     delningsruta där den finns, annars kopieras länken. */
+  function delaKnapp(vantaInte) {
+    if (!T.delaKnapp) { return true; }
+    var fas = document.getElementById('phase-coupon-landing');
+    var pdf = document.getElementById('coupon-landing-show-pdf');
+    if (!fas || !pdf) { return false; }
+    if (document.getElementById('uc-dela')) { return true; }
+    /* Knappen ska stå under nedladdningsknappen, som först ska ha flyttats
+       ut ur arket (pdfKnapp). Egen rad: klick i nedladdningsknappens rad
+       slår på renderingsläget. */
+    if (pdf.parentElement !== fas && !vantaInte) { return false; }
+    var knapp = document.createElement('button');
+    knapp.type = 'button';
+    knapp.id = 'uc-dela';
+    knapp.className = 'cc-button btn-primary';
+    var text = document.createElement('span');
+    text.textContent = T.delaKnapp.text;
+    knapp.appendChild(text);
+    knapp.addEventListener('click', function () {
+      var url = location.origin + location.pathname;
+      if (navigator.share) {
+        navigator.share({ url: url }).catch(function () {});
+        return;
+      }
+      var klart = function () {
+        text.textContent = T.delaKnapp.kopierat;
+        setTimeout(function () { text.textContent = T.delaKnapp.text; }, 2500);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(klart, function () { window.prompt('', url); });
+      } else {
+        window.prompt('', url);
+      }
+    });
+    var rad = document.createElement('div');
+    rad.className = 'uc-dela-rad';
+    rad.appendChild(knapp);
+    if (pdf.parentElement === fas) { fas.insertBefore(rad, pdf.nextSibling); }
+    else { fas.appendChild(rad); }
+    return true;
+  }
+
+  function jul() {
+    if (!T.jul) { return; }
+    var root = document.documentElement;
+    root.classList.add('uc-jul');
+    /* Ytans färg, till hålet i etiketten */
+    var yta = document.querySelector('#phase-swish-products .wrapper, #phase-swish-form .wrapper, #phase-swish-result .wrapper');
+    if (yta) { root.style.setProperty('--uc-yta', getComputedStyle(yta).backgroundColor); }
+
+    var varv = function () {
+      snokanter();
+      tackKort();
+    };
+    varv();
+    setInterval(varv, 300);
+    window.addEventListener('resize', snokanter);
+    document.addEventListener('click', function () { setTimeout(snokanter, 0); setTimeout(snokanter, 80); }, true);
+
+    /* Gåvokortssidan ritas ibland efter DOMContentLoaded: försök en stund. */
+    if (document.body.classList.contains('coupon-landing') || document.getElementById('phase-coupon-landing')) {
+      var n = 0, lost = false, delat = false;
+      var iv = setInterval(function () {
+        n++;
+        if (!lost) { lost = losSnore(); }
+        if (!delat) { delat = delaKnapp(n > 30); }
+        if ((lost && delat) || n > 40) { clearInterval(iv); }
+      }, 250);
+    }
+  }
+
   /* ---------- start ---------- */
   function boot() {
     T = texter(kampanjId());
     document.documentElement.style.setProperty('--uc-preview-label', JSON.stringify(T.forhandsvisa));
     /* Varje del för sig, så att en krasch inte stoppar resten. */
-    [shapes, formStep, halsning, blad, stegrad, kortvisning, sno].forEach(function (fn) {
+    [shapes, formStep, halsning, blad, stegrad, kortvisning, sno, jul].forEach(function (fn) {
       try { fn(); } catch (e) { console.error('[uc-gavokort]', fn.name, e); }
     });
     document.documentElement.classList.add('uc-gavokort');

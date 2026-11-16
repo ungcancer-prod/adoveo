@@ -1,0 +1,226 @@
+/* ==========================================================================
+   15. JULKÄNSLA — snö på kanterna, etikett i formuläret, ljuslåga, snöre
+   --------------------------------------------------------------------------
+   Slås på per kampanj med "jul: true" i KAMPANJER (uc-gavokort.js), som
+   sätter klassen uc-jul på <html>. Allt här är dekor: tas klassen bort
+   fungerar sidan precis som förut.
+     15.1 snö som ligger på ytans och kortets överkant
+     15.2 etiketten runt hälsning och namn i formuläret
+     15.3 ljuslågan på kortet som fladdrar
+     15.4 snöret med rosett: knyts på tacksidan, löses upp på gåvokortssidan
+     15.5 tacksidans kort och dela-knappen på gåvokortssidan
+   Inget av det följer med i PDF:en (se sist i filen).
+   ========================================================================== */
+
+/* --- 15.1 SNÖ PÅ KANTERNA -------------------------------------------------
+   En vit driva som ligger på överkanten. På ytorna (.wrapper) och på
+   gåvokortssidans ark ligger den i ett eget element som scriptet placerar
+   (snokanter), eftersom ytan har clip-path och arket overflow: hidden, som
+   båda skulle klippa bort den. På korten räcker ett pseudo-element. */
+html.uc-jul {
+  --uc-snokant: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 24' preserveAspectRatio='none'%3E%3Cpath fill='%23fff' d='M0 20 L0 13 C18 6 40 4 60 9 C80 14 100 3 130 6 C160 9 172 15 200 11 C230 7 250 2 280 7 C310 12 330 5 360 8 C380 10 392 13 400 11 L400 18 C382 22 360 16 330 20 C300 24 280 15 250 19 C220 23 200 17 170 20 C140 23 120 16 90 19 C60 22 30 17 0 20 Z'/%3E%3C/svg%3E");
+}
+html.uc-jul #phase-swish-products,
+html.uc-jul #phase-swish-form,
+html.uc-jul #phase-swish-result,
+html.uc-jul #phase-coupon-landing {
+  position: relative;   /* ankare för .uc-snokant */
+}
+.uc-snokant,
+html.uc-jul .uc-kort1__ark::before,
+html.uc-jul #giftcard-preview-container::before {
+  content: '';
+  position: absolute;
+  height: 22px;
+  background: var(--uc-snokant) center / 100% 100% no-repeat;
+  filter: drop-shadow(0 2px 2px rgba(40, 40, 38, .16));   /* så att snön syns även mot den vita ytan */
+  pointer-events: none;
+  z-index: 2;
+}
+html.uc-jul .uc-kort1__ark::before {
+  left: -3px;
+  right: -3px;
+  top: -12px;
+}
+/* Arket i formuläret: bara i det breda läget, där det står bredvid ytan */
+html.uc-jul #giftcard-preview-container::before { display: none; }
+@media (min-width: 900px) {
+  html.uc-jul body.uc-form-step #phase-swish-form > #giftcard-preview-container::before {
+    display: block;
+    left: -3px;
+    right: -3px;
+    top: -12px;
+  }
+}
+
+/* --- 15.2 ETIKETTEN I FORMULÄRET ------------------------------------------
+   Hälsningen och namnet ligger på en grön paketetikett med hål och snöre.
+   Fälten flyttas inte: etiketten är tre bakgrunder som sitter ihop, en
+   bakom varje del (hälsningen, raden med räknare och förslag, namnet). */
+html.uc-jul #message_group {
+  margin-top: 46px;   /* plats för etikettens topp och snöret */
+}
+html.uc-jul #message_group::before {
+  content: '';
+  position: absolute;
+  left: -16px;
+  right: -16px;
+  top: -30px;
+  bottom: 0;
+  z-index: -1;
+  /* hålet (ytans färg) + etikettens gröna */
+  background:
+    radial-gradient(circle at 50% 14px, var(--uc-yta, #FCF7E3) 0 6px, transparent 6.5px),
+    #8BEEA5;
+  clip-path: polygon(16px 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%, 0 16px);
+}
+/* Snöret genom hålet */
+html.uc-jul #message_group::after {
+  content: '';
+  position: absolute;
+  left: calc(50% - 9px);
+  top: -44px;
+  width: 18px;
+  height: 30px;
+  border: 2px solid #822530;
+  border-radius: 50%;
+  transform: rotate(8deg);
+  pointer-events: none;
+}
+html.uc-jul .uc-holk {
+  margin: 0 -16px;
+  padding: 0 16px;
+  background: #8BEEA5;
+}
+html.uc-jul #sender_name_group::before {
+  content: '';
+  position: absolute;
+  left: -16px;
+  right: -16px;
+  top: 0;
+  bottom: -8px;
+  z-index: -1;
+  background: #8BEEA5;
+}
+html.uc-jul #sender_phone_group {
+  margin-top: 24px;
+}
+
+/* --- 15.3 LJUSLÅGAN --------------------------------------------------------
+   Ett varmt sken över lågan i Sandras teckning, som fladdrar lite. Lågans
+   mitt ligger på 79 % / 37,1 % av arket (627 / 408 px av 794 x 1100). */
+html.uc-jul .uc-kort1__ark::after,
+html.uc-jul #giftcard-preview > .wrapper:has(.uc-julkort)::after,
+html.uc-jul body:has(#phase-coupon-landing) #wrapper:has(.uc-julkort)::after {
+  content: '';
+  position: absolute;
+  left: 79%;
+  top: 37.1%;
+  width: 9%;
+  aspect-ratio: 1;
+  margin: -4.5% 0 0 -4.5%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 232, 160, .9) 0, rgba(255, 196, 96, .4) 38%, rgba(255, 196, 96, 0) 70%);
+  mix-blend-mode: screen;
+  pointer-events: none;
+  animation: uc-fladder 3.4s ease-in-out infinite;
+}
+@keyframes uc-fladder {
+  0%   { opacity: .55; transform: scale(.92); }
+  12%  { opacity: .85; transform: scale(1.06); }
+  20%  { opacity: .6;  transform: scale(.96); }
+  34%  { opacity: .9;  transform: scale(1.12); }
+  47%  { opacity: .65; transform: scale(.98); }
+  58%  { opacity: .8;  transform: scale(1.04); }
+  71%  { opacity: .5;  transform: scale(.9); }
+  84%  { opacity: .88; transform: scale(1.1); }
+  100% { opacity: .55; transform: scale(.92); }
+}
+
+/* --- 15.4 SNÖRET MED ROSETT -------------------------------------------------
+   En SVG över kortet (byggs av scriptet, snore). Samma mått som arket:
+   viewBox 794 x 1100. --knyt ritar upp snöret och rosetten (tacksidan),
+   --los drar tillbaka dem (gåvokortssidan). */
+.uc-snore {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 3;
+}
+.uc-snore path {
+  fill: none;
+  stroke: #8BEEA5;
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;      /* pathLength är 1 på alla linjer */
+  stroke-dashoffset: 0;
+}
+.uc-snore .uc-snore__bage { stroke-width: 6; }
+.uc-snore .uc-snore__knut { fill: #8BEEA5; stroke: none; }
+
+.uc-snore--knyt path,
+.uc-snore--knyt .uc-snore__knut { animation: uc-dra .8s ease-out both; }
+.uc-snore--knyt .uc-snore__l2   { animation-delay: .55s; }
+.uc-snore--knyt .uc-snore__knut { animation-name: uc-fram; animation-duration: .25s; animation-delay: 1.3s; }
+.uc-snore--knyt .uc-snore__b1   { animation-duration: .5s; animation-delay: 1.4s; }
+.uc-snore--knyt .uc-snore__b2   { animation-duration: .5s; animation-delay: 1.65s; }
+.uc-snore--knyt .uc-snore__s1   { animation-duration: .4s; animation-delay: 1.95s; }
+.uc-snore--knyt .uc-snore__s2   { animation-duration: .4s; animation-delay: 2.1s; }
+
+.uc-snore--los path,
+.uc-snore--los .uc-snore__knut { animation: uc-slapp .6s ease-in both; }
+.uc-snore--los .uc-snore__s1,
+.uc-snore--los .uc-snore__s2   { animation-delay: .9s; animation-duration: .35s; }
+.uc-snore--los .uc-snore__b1,
+.uc-snore--los .uc-snore__b2   { animation-delay: 1.15s; animation-duration: .45s; }
+.uc-snore--los .uc-snore__knut { animation-name: uc-bort; animation-delay: 1.55s; animation-duration: .2s; }
+.uc-snore--los .uc-snore__l2   { animation-delay: 1.7s; }
+.uc-snore--los .uc-snore__l1   { animation-delay: 2s; }
+
+@keyframes uc-dra   { 0% { stroke-dashoffset: 1; opacity: 0; } 8% { opacity: 1; } 100% { stroke-dashoffset: 0; opacity: 1; } }
+@keyframes uc-slapp { 0% { stroke-dashoffset: 0; opacity: 1; } 92% { opacity: 1; } 100% { stroke-dashoffset: 1; opacity: 0; } }
+@keyframes uc-fram  { from { opacity: 0; } to { opacity: 1; } }
+@keyframes uc-bort  { from { opacity: 1; } to { opacity: 0; } }
+
+/* --- 15.5 TACKSIDANS KORT OCH DELA-KNAPPEN -------------------------------- */
+.uc-kort1--tack {
+  max-width: 280px;
+  margin: 28px auto 32px;
+}
+.uc-tack-data { display: none; }
+/* Dela-knappen står i en egen rad under nedladdningsknappen */
+.uc-dela-rad {
+  flex: 0 0 auto;
+  margin: 12px 0 0;
+  text-align: center;
+}
+/* Knapparna står på sidans röda bakgrund, så de får ytans ljusa fyllning */
+html.uc-jul #phase-coupon-landing > #coupon-landing-show-pdf .cc-button:not(:hover),
+html.uc-jul .uc-dela-rad .cc-button:not(:hover) {
+  background-color: #FCF7E3;
+}
+
+/* Den som bett om minskad rörelse får allt stilla, och inget snöre som löses upp */
+@media (prefers-reduced-motion: reduce) {
+  html.uc-jul .uc-kort1__ark::after,
+  html.uc-jul #giftcard-preview > .wrapper:has(.uc-julkort)::after,
+  html.uc-jul body:has(#phase-coupon-landing) #wrapper:has(.uc-julkort)::after { animation: none; opacity: .7; }
+  .uc-snore path,
+  .uc-snore .uc-snore__knut { animation: none !important; }
+  .uc-snore--los { display: none; }
+}
+
+/* PDF: ingen dekor på arket. content: none tar bort lågans pseudo-element,
+   och med !important vinner det över reglerna i 15.3. */
+body.uc-pdf-render .uc-snokant,
+body.uc-pdf-render .uc-snore,
+body.uc-pdf-render .uc-dela-rad {
+  display: none !important;
+}
+html.uc-jul body.uc-pdf-render:has(#phase-coupon-landing) #wrapper:has(.uc-julkort)::after {
+  content: none !important;
+}
