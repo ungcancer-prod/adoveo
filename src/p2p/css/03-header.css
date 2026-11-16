@@ -4,7 +4,7 @@
    mitten, meny- och sökikon till höger. Under 1024px försvinner
    mittmenyn och ikonerna bär allt. Göms när man scrollar ner, visas
    igen när man scrollar upp.
-   Markupen byggs av src/js/uc-p2p.js (menyn ändras där).
+   Markupen byggs av src/p2p/js/uc-p2p.js (menyn ändras där).
    Ikonerna ligger i src/icons/ och byggs in där det står @@ + namn + @@.
    ========================================= */
 :root {

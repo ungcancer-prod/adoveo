@@ -1,7 +1,7 @@
 /* ==========================================================================
    13. STEGRADEN — 1 Välj belopp, 2 Skapa, 3 Dela
    --------------------------------------------------------------------------
-   Samma element som på P2P-konceptsidorna (.uc-progress i src/css/
+   Samma element som på P2P-konceptsidorna (.uc-progress i src/p2p/css/
    02-koncept.css), här med egna mått i px. Byggs av scriptet (stegrad):
      steg 1  landningssidan, mellan texten och beloppsknapparna
      steg 2  formuläret, ovanför rubriken

@@ -2,7 +2,7 @@
    06 — FOOTER (sektion 15)
    Footern från ungcancer.se, inverterad: vit yta och Ung Cancers svarta
    text. Ingen land/språkväljare. Markupen och texterna byggs av
-   src/js/uc-p2p.js (listan FOOTER), ikonerna ligger i src/icons/.
+   src/p2p/js/uc-p2p.js (listan FOOTER), ikonerna ligger i src/icons/.
    ========================================= */
 .uc-footer {
     padding: 112px 48px 32px;

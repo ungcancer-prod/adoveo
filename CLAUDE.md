@@ -1,6 +1,7 @@
 # Instruktioner för Claude i det här repot
 
-Repot driver Ung Cancers P2P-sidor på Adoveo. Ändringar i `main` publiceras
+Repot driver Ung Cancers kampanjsidor på Adoveo: P2P-insamlingarna (paketet
+`uc-p2p`, `src/p2p/`) och gåvokortskampanjerna (`uc-gavokort`, `src/gavokort/`). Ändringar i `main` publiceras
 automatiskt till GitHub Pages och slår igenom på **alla live-sidor** inom
 några minuter. Behandla varje push som en produktionsrelease.
 
@@ -18,4 +19,5 @@ några minuter. Behandla varje push som en produktionsrelease.
 - Ingen emoji i något som ska klistras in i Adoveo (sparandet kraschar).
 - Inga hemligheter i repot — det är publikt.
 - Plattformsdetaljer (DOM, fas-id:n, shortcodes, fällor) finns i
-  Claude-projektet "Ung Cancer - Adoveo assistent" (`claude/p2p-2026.md`).
+  Claude-projektet "Ung Cancer - Adoveo assistent" (`claude/p2p-2026.md`,
+  `claude/gavokort-311.md`).

@@ -1,12 +1,12 @@
 // Bygger paketen i BUNDLES nedan (dist/<namn>.css + dist/<namn>.js) och
 // kopierar src/assets/* (bilder) till dist/.
-//   uc-p2p       src/css/*.css           + src/js/uc-p2p.js           (P2P-sidorna)
+//   uc-p2p       src/p2p/css/*.css           + src/p2p/js/uc-p2p.js           (P2P-sidorna)
 //   uc-gavokort  src/gavokort/css/*.css  + src/gavokort/js/uc-gavokort.js (gåvokortskampanjerna)
 // Körs automatiskt av GitHub Actions vid varje ändring (se .github/workflows).
 // Lokalt: node build/build.mjs   (inga beroenden behövs)
 //
 // Vad bygget gör med CSS:en:
-//  1. Slår ihop src/css/*.css i nummerordning.
+//  1. Slår ihop src/p2p/css/*.css i nummerordning.
 //  2. Ersätter @@NAMN@@ med ikonen src/icons/namn.svg som data-URI.
 //  3. Lägger :not(uc-x) sist i varje selektor. Det matchar allt (det finns
 //     inget element som heter uc-x) men ger +1 i specificitet. Filen laddas
@@ -29,7 +29,7 @@ const stamp = new Date().toISOString().replace('T', ' ').slice(0, 16) + ' UTC';
 const sha = (process.env.GITHUB_SHA || 'lokalt').slice(0, 7);
 const banner = (what) =>
   `/* ${what} — GENERERAD FIL, ÄNDRA INTE HÄR.\n` +
-  `   Källa: github.com/ungcancer-prod/adoveo-p2p (src/). Byggd ${stamp}, ${sha}. */\n`;
+  `   Källa: github.com/ungcancer-prod/adoveo (src/). Byggd ${stamp}, ${sha}. */\n`;
 
 // ---------- ikoner ----------
 function svgUri(svg) {
@@ -134,7 +134,7 @@ function transform(css) {
 
 // ---------- bygg ----------
 const BUNDLES = [
-  { name: 'uc-p2p',      css: 'css',          js: 'js/uc-p2p.js' },
+  { name: 'uc-p2p',      css: 'p2p/css',      js: 'p2p/js/uc-p2p.js' },
   { name: 'uc-gavokort', css: 'gavokort/css', js: 'gavokort/js/uc-gavokort.js' }
 ];
 
@@ -161,5 +161,5 @@ writeFileSync(join(OUT, 'index.html'),
   '<!doctype html><meta charset="utf-8"><title>Ung Cancer på Adoveo — filer</title>' +
   '<p>Filerna som laddas på Ung Cancers sidor på Adoveo:</p><ul>' +
   BUNDLES.map(b => `<li><a href="${b.name}.css">${b.name}.css</a> + <a href="${b.name}.js">${b.name}.js</a></li>`).join('') + '</ul>' +
-  `<p>Byggd ${stamp}, ${sha}. Källa: <a href="https://github.com/ungcancer-prod/adoveo-p2p">github.com/ungcancer-prod/adoveo-p2p</a></p>\n`);
+  `<p>Byggd ${stamp}, ${sha}. Källa: <a href="https://github.com/ungcancer-prod/adoveo">github.com/ungcancer-prod/adoveo</a></p>\n`);
 console.log('Byggt:\n  ' + built.join('\n  ') + (assets.length ? `\n  assets: ${assets.join(', ')}` : ''));

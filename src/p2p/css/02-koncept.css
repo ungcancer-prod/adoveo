@@ -5,7 +5,7 @@
    det påverkar inte Summary eller infosidan.
 
    KONCEPTFÄRGEN väljs i Adoveo admin (temats färg för wrappern).
-   Scriptet (src/js/uc-p2p.js, conceptColors) läser av den färgen och
+   Scriptet (src/p2p/js/uc-p2p.js, conceptColors) läser av den färgen och
    sätter variablerna nedan: --uc-concept-bg = vald färg,
    --uc-concept-ink = svart eller krämvit beroende på hur mörk färgen
    är, --uc-concept-logo-bg = krämvit platta bakom logotyperna på mörk

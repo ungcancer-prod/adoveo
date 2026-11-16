@@ -218,7 +218,7 @@ hr.divider {
     clip-path: var(--uc-clip);
 }
 /* Oregelbunden kant på valfritt element: class="uc-clip".
-   Formen (#shape-box) ritas av scriptet, se SHAPES i src/js/uc-p2p.js. */
+   Formen (#shape-box) ritas av scriptet, se SHAPES i src/p2p/js/uc-p2p.js. */
 .uc-clip {
     -webkit-clip-path: var(--uc-clip);
     clip-path: var(--uc-clip);

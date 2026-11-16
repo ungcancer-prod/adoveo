@@ -1,5 +1,5 @@
 # Bygger dist/ av src/ och publicerar på GitHub Pages vid varje ändring i main.
-# Adoveo-sidorna laddar filerna från https://ungcancer-prod.github.io/adoveo-p2p/
+# Adoveo-sidorna laddar filerna från https://ungcancer-prod.github.io/adoveo/
 # Pages cachar i ca 10 minuter, så en ändring syns på sidorna inom några minuter.
 name: Bygg och publicera
 

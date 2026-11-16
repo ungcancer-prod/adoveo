@@ -1,6 +1,6 @@
 /* =========================================
    04 — INSAMLINGSKORTEN I "PÅGÅENDE INSAMLINGAR" (sektion 13)
-   Byggs om av src/js/uc-p2p.js (fundraiserCards) till samma uppställning
+   Byggs om av src/p2p/js/uc-p2p.js (fundraiserCards) till samma uppställning
    som artikelkorten på ungcancer.se: bild överst, textruta under, båda med
    oregelbunden kant, och en etikett med konceptet i bildens hörn.
    Fast format 4:5 (som 1080 x 1350). Hela kortet är en länk.

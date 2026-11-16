@@ -12,7 +12,7 @@
   window.ucHeaderInit = true;
   /* Mappen scriptet ligger i (GitHub Pages). Bilder i src/assets hamnar där. */
   var SELF = document.currentScript && document.currentScript.src;
-  var ASSETS = SELF ? SELF.replace(/[^\/]*$/, '') : 'https://ungcancer-prod.github.io/adoveo-p2p/';
+  var ASSETS = SELF ? SELF.replace(/[^\/]*$/, '') : 'https://ungcancer-prod.github.io/adoveo/';
 
   /* ---------- MENY ---------- */
   var BASE = 'https://ungcancer.adoveo.com/start/';

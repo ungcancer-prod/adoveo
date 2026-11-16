@@ -1,19 +1,20 @@
 # Kampanjerna i Adoveo — vad som ligger var
 
-All kod (CSS, header, meny, sök) laddas från det här repot. I Adoveo ligger
-bara två rader per kampanj. Konceptfärgen väljs med Adoveos egen färgväljare.
+All kod laddas från det här repot. I Adoveo ligger bara två rader per
+kampanj: P2P-kampanjerna laddar paketet `uc-p2p` (nedan), gåvokortskampanjerna
+`uc-gavokort` (se "Gåvokortskampanjerna" längre ner). Konceptfärgen väljs med Adoveos egen färgväljare.
 Allt annat i Adoveo är **innehåll**: rubriker, texter och fältetiketter.
 Det finns i `inputfalt/`.
 
-## De två raderna — samma i alla kampanjer
+## P2P: de två raderna — samma i alla P2P-kampanjer
 
 **Theme → Head Markup (for Scripts)** — de här två raderna och inget mer.
 SVG:n `#shape-box` som låg där tidigare ritas nu av scriptet och kan tas
 bort. (Ligger den kvar gör det inget — scriptet använder den då i stället.)
 
 ```html
-<link rel="stylesheet" href="https://ungcancer-prod.github.io/adoveo-p2p/uc-p2p.css">
-<script src="https://ungcancer-prod.github.io/adoveo-p2p/uc-p2p.js"></script>
+<link rel="stylesheet" href="https://ungcancer-prod.github.io/adoveo/uc-p2p.css">
+<script src="https://ungcancer-prod.github.io/adoveo/uc-p2p.js"></script>
 ```
 
 ## Fält som ska vara tomma
@@ -68,8 +69,8 @@ laddas inte där.
 **Theme → Head Markup (for Scripts)** — de här två raderna:
 
 ```html
-<link rel="stylesheet" href="https://ungcancer-prod.github.io/adoveo-p2p/uc-gavokort.css">
-<script src="https://ungcancer-prod.github.io/adoveo-p2p/uc-gavokort.js"></script>
+<link rel="stylesheet" href="https://ungcancer-prod.github.io/adoveo/uc-gavokort.css">
+<script src="https://ungcancer-prod.github.io/adoveo/uc-gavokort.js"></script>
 ```
 
 SVG:n `#shape-box` ritas av scriptet och kan tas bort ur Head Markup.
@@ -96,7 +97,7 @@ knapparna) ligger per kampanj i `KAMPANJER` i `src/gavokort/js/uc-gavokort.js`.
 1. Skapa den i Adoveo (P2P-mall eller Summary-mall).
 2. Lägg in de två raderna i Head Markup. Töm Custom CSS-fälten och Campaign Head.
 3. Konceptkampanj: välj wrapperns färg i Adoveos färgväljare.
-4. Ska den synas i menyn: lägg till den i `src/js/uc-p2p.js` (listorna `MENU_MAIN` / `MENU_MORE`).
+4. Ska den synas i menyn: lägg till den i `src/p2p/js/uc-p2p.js` (listorna `MENU_MAIN` / `MENU_MORE`).
 5. Fyll i tabellen ovan.
 
 ## Spara-fällor i Adoveo

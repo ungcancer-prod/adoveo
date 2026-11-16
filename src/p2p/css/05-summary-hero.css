@@ -2,7 +2,7 @@
    05 — SUMMARY-HERON (sektion 14)
    Första sektionen på Summary (294): rubrik och ingress från admin blir
    en hero med hjärtat av "JA!" till vänster. Byggs av
-   src/js/uc-p2p.js (buildHero); hjärtat är src/assets/hjarta.svg och
+   src/p2p/js/uc-p2p.js (buildHero); hjärtat är src/assets/hjarta.svg och
    bär sin egen animation (bubblorna växer fram uppifrån och ned).
    Knappen leder till konceptkorten (#valj-koncept).
    ========================================= */
