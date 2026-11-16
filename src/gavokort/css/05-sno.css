@@ -1,0 +1,23 @@
+/* ==========================================================================
+   14. SNÖFALL I BAKGRUNDEN
+   --------------------------------------------------------------------------
+   Slås på per kampanj med "sno: true" i KAMPANJER (uc-gavokort.js).
+   Scriptet ritar flingorna på en canvas som ligger still bakom allt
+   innehåll, på sidans bakgrundsfärg. Antal, storlek och fart står i SNO i
+   scriptet. Ritas inte alls för den som bett om minskad rörelse i sitt
+   system (prefers-reduced-motion).
+   ========================================================================== */
+.uc-sno {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;   /* klick går rakt igenom */
+}
+/* Innehållet läggs ovanför snön */
+html.uc-har-sno #wrap-default,
+html.uc-har-sno body > p {
+  position: relative;
+  z-index: 1;
+}

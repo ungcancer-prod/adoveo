@@ -16,6 +16,7 @@
    5. Stegraden (1 Välj belopp, 2 Skapa, 3 Dela) på landningssidan, i
       formuläret och på tacksidan.
    6. Kortet redan i steg 1: en bild av gåvokortet på landningssidan.
+   7. Snöfall i bakgrunden.
 
    VANLIGASTE ÄNDRINGEN: texterna. De ligger per kampanj i KAMPANJER nedan.
    Ingen emoji någonstans i den här filen eller i Adoveo.
@@ -50,6 +51,7 @@
       { text: 'Man ser bara rätt med hjärtat. Det viktigaste är osynligt för ögonen.', poet: 'Antoine de Saint-Exupéry' }
     ],
     forhandsvisa: 'Se minnesbladet',
+    sno: false,              /* snöfall i bakgrunden */
     kortvisning: null,       /* kortet redan i steg 1, t.ex. { text: 'Rad vid kortet' }. null = inget */
     steg: null,              /* stegraden, t.ex. ['Välj belopp', 'Skapa', 'Dela']. null = ingen */
     maxHalsning: 300,        /* teckentak. Uppmätt i 300: strax över tappar arket sin luft */
@@ -71,6 +73,7 @@
       forslag: [],
       forhandsvisa: 'Se gåvokortet',
       steg: ['Välj belopp', 'Skapa', 'Dela'],
+      sno: true,
       kortvisning: { text: 'Gåvokortet är ritat av Sandra, medlem i Ung Cancer' },
       maxHalsning: 240
     }
@@ -608,12 +611,117 @@
     document.addEventListener('click', function () { setTimeout(satt, 0); setTimeout(satt, 60); }, true);
   }
 
+  /* ---------- 7. snöfall ---------- */
+  /* Mjuka flingor som faller långsamt bakom innehållet. Tre djup: små,
+     svaga och långsamma längst bort, större och tydligare närmast. Allt
+     ritas på en canvas (CSS sektion 14). Pausas när fliken inte syns. */
+  var SNO = {
+    perYta: 26000,      /* en flinga per så här många px2 skärmyta ... */
+    max: 90,            /* ... men aldrig fler än så här */
+    radie: [1.2, 4.2],  /* minsta och största flinga, px */
+    fart: [10, 34],     /* fallhastighet, px per sekund */
+    svaj: [6, 22],      /* hur långt en flinga pendlar i sidled, px */
+    alfa: [0.25, 0.85], /* svagaste och starkaste flinga */
+    vind: 8,            /* långsam gemensam drift i sidled, px per sekund */
+    farg: '255, 255, 255'
+  };
+
+  function sno() {
+    if (!T.sno) { return; }
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) { return; }
+    if (document.querySelector('.uc-sno')) { return; }
+
+    var cv = document.createElement('canvas');
+    cv.className = 'uc-sno';
+    cv.setAttribute('aria-hidden', 'true');
+    var ctx = cv.getContext('2d');
+    if (!ctx) { return; }
+    document.body.insertBefore(cv, document.body.firstChild);
+    document.documentElement.classList.add('uc-har-sno');
+
+    /* En mjuk flinga ritas en gång och stämplas sedan ut i olika storlek. */
+    var stampel = document.createElement('canvas');
+    stampel.width = stampel.height = 64;
+    var sc = stampel.getContext('2d');
+    var g = sc.createRadialGradient(32, 32, 0, 32, 32, 32);
+    g.addColorStop(0, 'rgba(' + SNO.farg + ', 1)');
+    g.addColorStop(0.45, 'rgba(' + SNO.farg + ', 0.75)');
+    g.addColorStop(1, 'rgba(' + SNO.farg + ', 0)');
+    sc.fillStyle = g;
+    sc.fillRect(0, 0, 64, 64);
+
+    var W = 0, H = 0, flingor = [];
+    function mellan(par, d) { return par[0] + (par[1] - par[0]) * d; }
+    function ny(overst) {
+      var d = Math.pow(Math.random(), 1.6);   /* djup 0..1, flest långt bort */
+      return {
+        x: Math.random() * W,
+        y: overst ? -10 : Math.random() * H,
+        r: mellan(SNO.radie, d),
+        v: mellan(SNO.fart, d) * (0.8 + Math.random() * 0.4),
+        svaj: mellan(SNO.svaj, d),
+        fas: Math.random() * Math.PI * 2,
+        takt: 0.25 + Math.random() * 0.5,
+        a: mellan(SNO.alfa, d),
+        d: d
+      };
+    }
+    function matt() {
+      var dpr = Math.min(window.devicePixelRatio || 1, 2);
+      W = window.innerWidth;
+      H = window.innerHeight;
+      cv.width = Math.round(W * dpr);
+      cv.height = Math.round(H * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      var antal = Math.min(SNO.max, Math.round(W * H / SNO.perYta));
+      while (flingor.length > antal) { flingor.pop(); }
+      while (antal > flingor.length) { flingor.push(ny(false)); }
+    }
+
+    var forra = 0, tid = 0, igang = false;
+    function rita(nu) {
+      if (!igang) { return; }
+      var dt = Math.min((nu - forra) / 1000, 0.05);   /* hoppa inte efter en paus */
+      forra = nu;
+      tid += dt;
+      ctx.clearRect(0, 0, W, H);
+      var vind = Math.sin(tid * 0.07) * SNO.vind;
+      for (var i = 0; i !== flingor.length; i++) {
+        var f = flingor[i];
+        f.y += f.v * dt;
+        f.x += vind * (0.4 + f.d) * dt;
+        if (f.y - f.r * 3 > H) { flingor[i] = f = ny(true); }
+        if (f.x > W + 30) { f.x = -30; } else if (-30 > f.x) { f.x = W + 30; }
+        var x = f.x + Math.sin(tid * f.takt + f.fas) * f.svaj;
+        var s = f.r * 3;                               /* stämpeln är mjuk i kanten */
+        ctx.globalAlpha = f.a;
+        ctx.drawImage(stampel, x - s, f.y - s, s * 2, s * 2);
+      }
+      ctx.globalAlpha = 1;
+      requestAnimationFrame(rita);
+    }
+    function start() {
+      if (igang || document.hidden) { return; }
+      igang = true;
+      forra = performance.now();
+      requestAnimationFrame(rita);
+    }
+    function stopp() { igang = false; }
+
+    matt();
+    window.addEventListener('resize', matt);
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) { stopp(); } else { start(); }
+    });
+    start();
+  }
+
   /* ---------- start ---------- */
   function boot() {
     T = texter(kampanjId());
     document.documentElement.style.setProperty('--uc-preview-label', JSON.stringify(T.forhandsvisa));
     /* Varje del för sig, så att en krasch inte stoppar resten. */
-    [shapes, formStep, halsning, blad, stegrad, kortvisning].forEach(function (fn) {
+    [shapes, formStep, halsning, blad, stegrad, kortvisning, sno].forEach(function (fn) {
       try { fn(); } catch (e) { console.error('[uc-gavokort]', fn.name, e); }
     });
     document.documentElement.classList.add('uc-gavokort');
