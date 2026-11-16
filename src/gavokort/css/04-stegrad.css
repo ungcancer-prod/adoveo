@@ -1,0 +1,89 @@
+/* ==========================================================================
+   13. STEGRADEN — 1 Välj belopp, 2 Skapa, 3 Dela
+   --------------------------------------------------------------------------
+   Samma element som på P2P-konceptsidorna (.uc-progress i src/css/
+   02-koncept.css), här med egna mått i px. Byggs av scriptet (stegrad):
+     steg 1  landningssidan, mellan texten och beloppsknapparna
+     steg 2  formuläret, ovanför rubriken
+     steg 3  tacksidan, ovanför rubriken
+   Stegens namn står per kampanj i KAMPANJER (steg) i uc-gavokort.js.
+   Bara pågående steg i full färg. Klart = blekt med bock, kommande = blekt
+   med siffra. Färgen följer ytans textfärg; --uc-step-bg (ytans färg, till
+   bocken) sätts av scriptet.
+   ========================================================================== */
+.uc-progress {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 auto 32px;
+  padding: 0;
+  list-style: none;
+  color: inherit;
+}
+/* På landningssidan står raden mitt i innehållet, inte överst */
+#phase-swish-products .uc-progress { margin: 32px auto 20px; }
+
+.uc-progress__step,
+.uc-progress .uc-progress__link {   /* .uc-progress framför: plattformens röda a:link */
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: inherit;
+  text-decoration: none;
+}
+.uc-progress__step + .uc-progress__step::before {   /* strecket mellan stegen */
+  content: '';
+  width: 16px;
+  height: 2px;
+  margin-right: 4px;
+  background-color: currentColor;
+  opacity: 0.35;
+}
+.uc-progress__dot {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 22px;
+  height: 22px;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  font-family: Customfont1, sans-serif;
+  font-size: 13px;
+  line-height: 1;
+}
+.uc-progress__step--done .uc-progress__dot { background-color: currentColor; }
+.uc-progress__step--done .uc-progress__dot::after {   /* bocken i ytans färg */
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: var(--uc-step-bg, #FCF7E3);
+  -webkit-mask: @@CHECK@@ center / 14px no-repeat;
+  mask: @@CHECK@@ center / 14px no-repeat;
+}
+.uc-progress__label {
+  font-family: Customfont1, sans-serif;
+  font-size: 16px;
+  line-height: 1;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+.uc-progress__step--done,
+.uc-progress__step--next { opacity: 0.45; }
+.uc-progress .uc-progress__link:hover .uc-progress__label {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+/* Bara för skärmläsare ("Klart:") */
+.uc-progress .uc-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

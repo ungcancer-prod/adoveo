@@ -13,6 +13,8 @@
    3. Hälsningsfältet: textarea med teckentak, räknare och förslag.
    4. Gåvokortssidan /c/...: arkets visningsskala, nedladdningsknappen ut
       ur arket, och renderingsläget när PDF:en skapas.
+   5. Stegraden (1 Välj belopp, 2 Skapa, 3 Dela) på landningssidan, i
+      formuläret och på tacksidan.
 
    VANLIGASTE ÄNDRINGEN: texterna. De ligger per kampanj i KAMPANJER nedan.
    Ingen emoji någonstans i den här filen eller i Adoveo.
@@ -47,6 +49,7 @@
       { text: 'Man ser bara rätt med hjärtat. Det viktigaste är osynligt för ögonen.', poet: 'Antoine de Saint-Exupéry' }
     ],
     forhandsvisa: 'Se minnesbladet',
+    steg: null,              /* stegraden, t.ex. ['Välj belopp', 'Skapa', 'Dela']. null = ingen */
     maxHalsning: 300,        /* teckentak. Uppmätt i 300: strax över tappar arket sin luft */
     raknareKvar: 'Ungefär {n} tecken kvar.',
     raknareSlut: 'Hälsningen är så lång den kan bli.'
@@ -65,6 +68,7 @@
       forslagKnapp: 'Saknar du ord? Läs våra förslag',
       forslag: [],
       forhandsvisa: 'Se gåvokortet',
+      steg: ['Välj belopp', 'Skapa', 'Dela'],
       maxHalsning: 240
     }
   };
@@ -188,7 +192,20 @@
     if (x) { x.click(); }
   }
 
-  /* Råa shortcodes och lorem-text på arket blir spökskrift. */
+  /* Har givaren själv skrivit texten i något fält? Då är det inte
+     plattformens utfyllnadstext, även om det råkar stå "lorem ipsum". */
+  function skrivet(text) {
+    var t = text.replace(/\s+/g, ' ').trim();
+    var falt = document.querySelectorAll('#phase-swish-form input.cc-input, #phase-swish-form textarea');
+    for (var i = 0; i !== falt.length; i++) {
+      var v = (falt[i].value || '').replace(/\s+/g, ' ').trim();
+      if (v && v === t) { return true; }
+    }
+    return false;
+  }
+
+  /* Råa shortcodes och plattformens utfyllnadstext (lorem) på arket blir
+     spökskrift. */
   function paint() {
     var box = document.getElementById('giftcard-preview');
     if (!box) { return; }
@@ -199,7 +216,8 @@
     var walk = document.createTreeWalker(box, NodeFilter.SHOW_TEXT, null);
     var node, hits = [];
     while ((node = walk.nextNode())) {
-      if (RE_TOKEN.test(node.nodeValue) || RE_LOREM.test(node.nodeValue)) { hits.push(node); }
+      if (RE_TOKEN.test(node.nodeValue) ||
+          (RE_LOREM.test(node.nodeValue) && !skrivet(node.nodeValue))) { hits.push(node); }
     }
     for (i = 0; i !== hits.length; i++) {
       var t = hits[i];
@@ -464,12 +482,79 @@
     else { window.addEventListener('load', function () { setTimeout(kick, 300); }); }
   }
 
+  /* ---------- 5. stegraden ---------- */
+  /* Samma element som på P2P-konceptsidorna. Utseendet i CSS sektion 13.
+     Steg 1 länkar tillbaka till landningssidan när man står i formuläret. */
+  function stegLista(nu) {
+    var ol = document.createElement('ol');
+    ol.className = 'uc-progress';
+    ol.setAttribute('aria-label', 'Stegen till ditt gåvokort');
+    T.steg.forEach(function (text, i) {
+      var n = i + 1;
+      var lage = nu > n ? 'done' : (nu === n ? 'current' : 'next');
+      var li = document.createElement('li');
+      li.className = 'uc-progress__step uc-progress__step--' + lage;
+      if (lage === 'current') { li.setAttribute('aria-current', 'step'); }
+      var box = li;
+      if (lage === 'done' && n === 1 && nu === 2) {
+        box = document.createElement('a');
+        box.className = 'uc-progress__link';
+        box.href = location.pathname + location.search;
+        li.appendChild(box);
+      }
+      var dot = document.createElement('span');
+      dot.className = 'uc-progress__dot';
+      if (lage === 'done') {
+        var sr = document.createElement('span');
+        sr.className = 'uc-sr';
+        sr.textContent = 'Klart:';
+        dot.appendChild(sr);
+      } else {
+        dot.textContent = String(n);
+      }
+      box.appendChild(dot);
+      var label = document.createElement('span');
+      label.className = 'uc-progress__label';
+      label.textContent = text;
+      box.appendChild(label);
+      ol.appendChild(li);
+    });
+    return ol;
+  }
+
+  /* Var raden står: [fas, elementet den läggs intill, före/efter, steg] */
+  var STEG_PLATS = [
+    ['phase-swish-products', '.registration-text-above', 'efter', 1],
+    ['phase-swish-form', '#page-title-swish-form', 'fore', 2],
+    ['phase-swish-result', '.page-title', 'fore', 3]
+  ];
+
+  function stegrad() {
+    if (!T.steg || !T.steg.length) { return; }
+    var satt = function () {
+      STEG_PLATS.forEach(function (p) {
+        var fas = document.getElementById(p[0]);
+        if (!fas || fas.querySelector('.uc-progress')) { return; }
+        var vid = fas.querySelector(p[1]);
+        if (!vid) { return; }
+        var ol = stegLista(p[3]);
+        vid.parentNode.insertBefore(ol, p[2] === 'fore' ? vid : vid.nextSibling);
+        /* Ytans färg till bocken */
+        var yta = ol.closest('.wrapper');
+        if (yta) { ol.style.setProperty('--uc-step-bg', getComputedStyle(yta).backgroundColor); }
+      });
+    };
+    satt();
+    /* Adoveo kan rita om faserna: sätt tillbaka raden om den försvinner. */
+    setInterval(satt, 700);
+  }
+
   /* ---------- start ---------- */
   function boot() {
     T = texter(kampanjId());
     document.documentElement.style.setProperty('--uc-preview-label', JSON.stringify(T.forhandsvisa));
     /* Varje del för sig, så att en krasch inte stoppar resten. */
-    [shapes, formStep, halsning, blad].forEach(function (fn) {
+    [shapes, formStep, halsning, blad, stegrad].forEach(function (fn) {
       try { fn(); } catch (e) { console.error('[uc-gavokort]', fn.name, e); }
     });
     document.documentElement.classList.add('uc-gavokort');
