@@ -354,6 +354,13 @@ body.uc-pdf-render:has(#phase-coupon-landing) #coupon-landing-show-pdf {
   display: none !important;
 }
 
+/* Allt annat i body (Campaign footer med hjälptexten, radbrytningar) göms
+   under fotograferingen. Uppmätt 2026-11-16: med footern blir body 1249px,
+   alltså över sidbrytningen vid 1123, och PDF:en får en andra sida. */
+body.uc-pdf-render:has(#phase-coupon-landing) > *:not(#wrap-default) {
+  display: none !important;
+}
+
 /* ==========================================================================
    11.6 HÄLSNINGSFÄLTET OCH FÖRSLAGEN
    Adoveos #message är en input type="text" och kan inte bära radbrytningar.
