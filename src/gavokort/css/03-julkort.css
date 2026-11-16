@@ -1,0 +1,83 @@
+/* ==========================================================================
+   12. JULKORTET — kampanj 311, En vanlig jul
+   --------------------------------------------------------------------------
+   Arket är hela kortet som EN bild (src/assets/julgava-311.jpg: logotyp,
+   JULGÅVA med paketen, devisen, logoraden). Ovanpå ligger bara det som
+   givaren skriver: hälsningen och avsändaren, i den tomma ytan mellan
+   illustrationen och devisen.
+
+   Slås på av innehållet i Adoveo, inte av kampanjens id: Giftcards-stegets
+   mittblock är
+     <div class="uc-julkort"><blockquote>{message}</blockquote><cite>{sender_name}</cite></div>
+   och :has(.uc-julkort) känner igen arket, både i formulärets
+   förhandsvisning och på gåvokortssidan /c/… (som saknar kampanj-id i
+   adressen). Andra gåvokortskampanjer berörs inte.
+
+   Bilden är A4 (794 x 1123 vid arkets bredd), arket 794 x 1100. Den
+   centreras, så 11,5px faller bort upptill och nedtill. Fria ytan i bilden
+   är y 1165-1554 av 2000, alltså 643-861px på arket.
+
+   Byta bild: lägg en ny fil i src/assets/ (hela kortet, 1414 x 2000, UTAN
+   text i hälsningsytan) och byt filnamnet nedan.
+   ========================================================================== */
+
+/* background-color krävs med !important: 11.1 sätter vitt på arket. */
+#giftcard-preview > .wrapper:has(.uc-julkort),
+body:has(#phase-coupon-landing) #wrapper:has(.uc-julkort) {
+  position: relative;   /* ankare för hälsningen, även när transform nollas i PDF-läget */
+  background: #822530 url("julgava-311.jpg") center / 100% auto no-repeat !important;
+  color: #FCF7E3;
+}
+
+/* Allt annat på arket göms (tomma block, plattformens etiketter).
+   Nedladdningsknappen undantas: den ligger i arket tills scriptet flyttat den. */
+#giftcard-preview > .wrapper:has(.uc-julkort) > *:not(:has(.uc-julkort)),
+body:has(#phase-coupon-landing) #wrapper:has(.uc-julkort) > *:not(:has(.uc-julkort)):not(#coupon-landing-show-pdf) {
+  display: none;
+}
+
+/* Hälsningen och avsändaren, centrerade i den fria ytan */
+.uc-julkort {
+  position: absolute;
+  left: 97px;
+  right: 97px;
+  top: 652px;
+  height: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  text-align: center;
+  color: #FCF7E3;
+}
+.uc-julkort blockquote {
+  margin: 0;
+  max-width: none;
+  font-family: Customfont2, Adoveo, sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0;
+  text-transform: none;
+  color: inherit;
+  overflow-wrap: anywhere;
+}
+.uc-julkort cite {
+  display: block;
+  margin: 0;
+  font-family: Customfont2, Adoveo, sans-serif;
+  font-size: 16px;
+  line-height: 1.2;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: inherit;
+}
+.uc-julkort cite:empty { display: none; }
+
+/* PDF: Adoveo fotograferar body med min-height 1122px. Arket är 1100, så
+   de sista 22 pixlarna är body. Röd body gör att sidan inte får en vit
+   remsa nederst. Gäller bara de sekunder renderingsläget är på. */
+body.uc-pdf-render:has(.uc-julkort) {
+  background: #822530 !important;
+}

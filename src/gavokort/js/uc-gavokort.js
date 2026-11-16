@@ -11,6 +11,8 @@
       mobil, skalat från PDF:ens geometri 794 x 1100 px. Tomma fält och råa
       shortcodes på arket visas i spökskrift.
    3. Hälsningsfältet: textarea med teckentak, räknare och förslag.
+   4. Gåvokortssidan /c/...: arkets visningsskala, nedladdningsknappen ut
+      ur arket, och renderingsläget när PDF:en skapas.
 
    VANLIGASTE ÄNDRINGEN: texterna. De ligger per kampanj i KAMPANJER nedan.
    Ingen emoji någonstans i den här filen eller i Adoveo.
@@ -45,6 +47,7 @@
       { text: 'Man ser bara rätt med hjärtat. Det viktigaste är osynligt för ögonen.', poet: 'Antoine de Saint-Exupéry' }
     ],
     forhandsvisa: 'Se minnesbladet',
+    maxHalsning: 300,        /* teckentak. Uppmätt i 300: strax över tappar arket sin luft */
     raknareKvar: 'Ungefär {n} tecken kvar.',
     raknareSlut: 'Hälsningen är så lång den kan bli.'
   };
@@ -52,16 +55,24 @@
   var KAMPANJER = {
     /* 300 Minnesgåva. Ligger fortfarande på sina inline-script i Adoveo. */
     '300': {},
-    /* 311 En vanlig jul - Gåvokort. Texterna är 300:s tills julcopyn finns.
-       Fyll i det som skiljer, resten tas från STANDARD. */
-    '311': {}
+    /* 311 En vanlig jul - Gåvokort. Arket är julkortet (CSS sektion 12):
+       bara hälsning och avsändare skrivs ut på det. Hälsningsytan är 200px
+       hög, därav 240 tecken. forslag är tom tills julcopyn finns (300:s
+       dikter är sorgetexter); fyll på med { text: '...', poet: '' }. */
+    '311': {
+      falt: { receiver_name: '', message: 'Din hälsning', sender_name: 'Ditt namn' },
+      taggar: { BLOCKQUOTE: 'Din hälsning', CITE: 'Ditt namn' },
+      forslagKnapp: 'Saknar du ord? Läs våra förslag',
+      forslag: [],
+      forhandsvisa: 'Se gåvokortet',
+      maxHalsning: 240
+    }
   };
 
   /* ---------- GRÄNSER ---------- */
   var BRYT = 900;            /* desktop-läge från denna bredd */
   var BREDD = '900px';       /* #wrap-default i formulärsteget på desktop */
   var BLAD_W = 794;          /* arkets bredd, se CSS 11. Höjden 1100 bor i CSS */
-  var MAX_HALSNING = 300;    /* uppmätt i 300: strax över tappar arket sin luft */
   var MAX_NAMN = 80;         /* skydd mot inklistrat skräp, ingen layoutgräns */
   var VARNA = 40;            /* räknaren syns när så här många tecken är kvar */
 
@@ -255,7 +266,7 @@
 
   function rakna() {
     if (!ta || !rakn) { return; }
-    var kvar = MAX_HALSNING - ta.value.length;
+    var kvar = T.maxHalsning - ta.value.length;
     if (kvar > VARNA) {
       rakn.className = 'uc-rakn';
       rakn.textContent = '';
@@ -321,7 +332,7 @@
     ta.id = 'uc-halsning';
     ta.className = inp.className;
     ta.rows = 1;
-    ta.setAttribute('maxlength', MAX_HALSNING);
+    ta.setAttribute('maxlength', T.maxHalsning);
     ta.setAttribute('autocomplete', 'off');
     ta.placeholder = inp.getAttribute('placeholder') || '';
     ta.value = inp.value || '';
@@ -390,12 +401,75 @@
     }, 700);
   }
 
+  /* ---------- 4. gåvokortssidan /c/... ---------- */
+  /* Låg tidigare i Adoveo som eget script (uc-blad). Flaggan __ucBlad delas
+     med det, så ligger det gamla kvar i en kampanj körs bara det ena.
+     Arket behåller sin layout på 794 x 1100 px, bara ritningen krymper
+     (--uc-k). BLAD_H ska vara samma som --uc-blad-h i CSS 11.4. */
+  var BLAD_H = 1100;
+  var RESERV = 220;          /* plats för knappen och luft runt arket */
+
+  function onLanding() { return !!document.getElementById('phase-coupon-landing'); }
+
+  function fit() {
+    if (!onLanding()) { return false; }
+    var k = Math.min(1, (window.innerHeight - RESERV) / BLAD_H);
+    if (window.innerWidth < BLAD_W + 40) {
+      k = Math.min(k, (window.innerWidth - 32) / BLAD_W);
+    }
+    k = Math.max(k, 0.2);
+    document.documentElement.style.setProperty('--uc-k', k);
+    return true;
+  }
+
+  /* Knappen flyttas ut ur arket och sätter body.uc-pdf-render vid klick,
+     så att bara arket fotograferas (CSS 11.5). */
+  function pdfKnapp() {
+    var phase = document.getElementById('phase-coupon-landing');
+    var btn = document.getElementById('coupon-landing-show-pdf');
+    if (!phase || !btn) { return false; }
+    if (btn.parentElement !== phase) { phase.appendChild(btn); }
+    btn.addEventListener('click', function () {
+      document.body.classList.add('uc-pdf-render');
+      setTimeout(function () { document.body.classList.remove('uc-pdf-render'); }, 4000);
+    }, true);
+    return true;
+  }
+
+  function blad() {
+    if (window.__ucBlad) { return; }
+    window.__ucBlad = true;
+
+    /* Skalan först, så tidigt det går: fasen kan ritas efter
+       DOMContentLoaded, och ett sent hopp syns på mobil. */
+    var tidiga = 0;
+    var iv1 = setInterval(function () {
+      tidiga++;
+      if (fit() || tidiga > 100) { clearInterval(iv1); }
+    }, 30);
+    window.addEventListener('resize', fit);
+    window.addEventListener('orientationchange', function () { setTimeout(fit, 120); });
+
+    /* Knappen efter window.load, när Adoveo bundit sin klickhanterare. */
+    function kick() {
+      if (!onLanding()) { return; }
+      var forsok = 0;
+      var iv2 = setInterval(function () {
+        fit();
+        forsok++;
+        if (pdfKnapp() || forsok > 40) { clearInterval(iv2); }
+      }, 300);
+    }
+    if (document.readyState === 'complete') { setTimeout(kick, 300); }
+    else { window.addEventListener('load', function () { setTimeout(kick, 300); }); }
+  }
+
   /* ---------- start ---------- */
   function boot() {
     T = texter(kampanjId());
     document.documentElement.style.setProperty('--uc-preview-label', JSON.stringify(T.forhandsvisa));
     /* Varje del för sig, så att en krasch inte stoppar resten. */
-    [shapes, formStep, halsning].forEach(function (fn) {
+    [shapes, formStep, halsning, blad].forEach(function (fn) {
       try { fn(); } catch (e) { console.error('[uc-gavokort]', fn.name, e); }
     });
     document.documentElement.classList.add('uc-gavokort');
