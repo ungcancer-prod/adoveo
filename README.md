@@ -30,7 +30,7 @@ Mapparna:
 | `src/p2p/` | P2P-paketets CSS och JS |
 | `src/gavokort/` | Gåvokortspaketets CSS och JS |
 | `src/icons/` | Ikoner (SVG) som byggs in i CSS:en, delas av paketen |
-| `src/assets/` | Bilder som sidorna laddar direkt (hjärtat på P2P, julkortets bild) |
+| `src/assets/` | Bilder som sidorna laddar direkt (hjärtat och konceptkortens bilder på P2P, julkortets bild) |
 | `adoveo/kampanjer.md` | Vilka kampanjer som finns och vad som ska stå i vilket fält i Adoveo |
 | `adoveo/inputfalt/` | Texterna som ligger i Adoveo, en fil per kampanj |
 | `build/` | Bygget. Behöver normalt inte röras |
@@ -63,6 +63,7 @@ kontrollera efteråt.
 | Header, menypanel, sök, ankare, infosidan | `src/p2p/css/03-header.css` (sektion 12) |
 | Korten i Pågående insamlingar (utseende) | `src/p2p/css/04-insamlingskort.css` (sektion 13) |
 | Heron och "Tillsammans har vi samlat in" överst på Summary | `src/p2p/css/05-summary-hero.css` (sektion 14), bilden `src/assets/hjarta.svg`, texterna i `HERO_CTA` och `TOTAL_TEXT` i `src/p2p/js/uc-p2p.js` (summan räknas ihop från konceptkortens belopp) |
+| Bilderna på konceptkorten på 294 | `src/assets/koncept-fodelsedag.jpg`, `-utmaning.jpg`, `-till-minne.jpg`, `-pepp.jpg` (4:3, 1200 x 900). Länkas från korten i `adoveo/inputfalt/294-summary.html`, som klistras in i 294-admin. Byt bild: ersätt filen med samma namn och pusha. |
 | Konceptens färg på korten (konceptkorten på 294, etiketterna på insamlingskorten) | `src/p2p/js/uc-p2p.js`, listan `MENU_MAIN` (`id`, `bg`, `ink`). Konceptkortet hittar sitt koncept via länken (`/start/295/` osv.) |
 | Footern (alla sidor): texter, adresser, logotyper, sociala medier | `src/p2p/js/uc-p2p.js`, listan `FOOTER`. Utseendet i `src/p2p/css/06-footer.css` (sektion 15). Logotyperna hämtas från ungcancer.se |
 | Logga och ikoner | `src/icons/*.svg` |
