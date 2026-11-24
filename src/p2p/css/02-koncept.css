@@ -78,6 +78,14 @@ body.swish-landing #phase-swish-result > .wrapper {
 }
 body.swish-landing #phase-swish-result > .wrapper {
     padding: var(--sp-7) var(--sp-4);
+    color: var(--uc-concept-ink);      /* krämvit på mörk yta (Till minne), annars svart */
+}
+body.swish-landing #phase-swish-result > .wrapper :is(.cc-title, .cc-txt, h1, h2, h3, h4, p) {
+    color: var(--uc-concept-ink);
+}
+body.swish-landing #phase-swish-result > .wrapper :is(.cc-txt, p) a:not(.cc-button) {
+    color: inherit;                    /* plattformens röda länkar: ytans färg, understrukna */
+    text-decoration: underline;
 }
 /* Givarens tacksida: standardbild bakom kortet i alla koncept
    (src/assets/tack-bakgrund.jpg, foto Tanja Lundin). En bild som läggs in
