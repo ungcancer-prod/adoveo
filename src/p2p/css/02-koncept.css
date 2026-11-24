@@ -31,6 +31,33 @@
     border: var(--uc-concept-frame);
     padding: var(--sp-7) var(--sp-4);
 }
+/* Givarens tacksida (End Page, /swMobileDone/..., body.swish-landing):
+   samma fulla bredd och luft som tacksidan efter skapad. Bredden kommer
+   annars från admins Wrapper Width. Text och logotyper hålls i läsbar
+   bredd i mitten. */
+body.swish-landing #wrap-default,
+body.swish-landing #phase-swish-result > .wrapper {
+    width: 100%;
+    max-width: none;
+    box-sizing: border-box;
+}
+body.swish-landing #phase-swish-result > .wrapper {
+    padding: var(--sp-7) var(--sp-4);
+}
+body.swish-landing #phase-swish-result .swish-done {
+    max-width: 640px;
+    margin-inline: auto;
+}
+body.swish-landing #phase-swish-result .swish-sub-heading {
+    max-width: 480px;
+    margin-inline: auto;
+}
+body.swish-landing #phase-swish-result .swish-sub-heading img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin-inline: auto;
+}
 /* Tacksidan (efter skapad) är lika bred i alla koncept. Bredden kommer
    annars från admins Wrapper Width, som skiljer mellan kampanjerna
    (295: 390px, 297: 100%). */
