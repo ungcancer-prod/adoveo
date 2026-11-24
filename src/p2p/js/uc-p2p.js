@@ -1071,8 +1071,30 @@
     shape();
 
     fundDescription(head);
+    fundSwishScroll(head);
     fitTitle(head.querySelector('.uc-fund__title'));
     fundSum(function (sum) { fundShown(shown, show, sum, goal); });
+  }
+
+  /* Efter Swisha: plattformen byter formuläret mot Swish-instruktionen
+     (#showText) utan att scrolla. Står man långt ner hamnar instruktionens
+     överkant ovanför skärmen. Då scrollas spalternas överkant fram, under
+     headern (samma avstånd som formuläret som följer med). */
+  function fundSwishScroll(head) {
+    var st = document.getElementById('showText');
+    if (!st) return;
+    var shown = false;
+    new MutationObserver(function () {
+      var vis = getComputedStyle(st).display !== 'none';
+      if (vis && !shown && window.matchMedia('(min-width: 800px)').matches) {   /* mobil: en spalt, där öppnas Swish-appen */
+        setTimeout(function () {
+          var gap = parseFloat(getComputedStyle(root).getPropertyValue('--uc-header-h')) || 104;
+          var top = head.getBoundingClientRect().top + window.scrollY - gap - 24;
+          if (window.scrollY > top) window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+        }, 50);
+      }
+      shown = vis;
+    }).observe(st, { attributes: true, attributeFilter: ['style', 'class'] });
   }
 
   /* Målet ur beskrivningen: [mål:1000] läses och tas bort ur texten */
