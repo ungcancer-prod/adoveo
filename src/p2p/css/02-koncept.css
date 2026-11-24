@@ -993,22 +993,22 @@ html.uc-fund-page #wrap-default {
    figcaption (avsändaren) och placerar lapparna (position absolute).
    Här bara lappens utseende. Spaltbredd och luft: WALL i uc-p2p.js.
    ========================================= */
-.p2p-transaction-landing .leaderboard {
+:is(.p2p-transaction-landing, .swish-landing) .leaderboard {
     width: 100%;
     max-width: none;
     margin: 64px 0 0;
 }
-.p2p-transaction-landing .leaderboard-container {
+:is(.p2p-transaction-landing, .swish-landing) .leaderboard-container {
     width: 100%;
     box-sizing: border-box;
 }
-.p2p-transaction-landing .leaderboard-records {
+:is(.p2p-transaction-landing, .swish-landing) .leaderboard-records {
     position: relative;
     width: 100%;
     margin: 0;
     padding: 0;
 }
-.p2p-transaction-landing .leaderboard-records > .uc-note {
+:is(.p2p-transaction-landing, .swish-landing) .leaderboard-records > .uc-note {
     position: absolute;
     box-sizing: border-box;
     width: max-content;
@@ -1017,7 +1017,7 @@ html.uc-fund-page #wrap-default {
     padding: 0;
     border: 0;
 }
-.p2p-transaction-landing .leaderboard-records > .uc-note--empty {
+:is(.p2p-transaction-landing, .swish-landing) .leaderboard-records > .uc-note--empty {
     display: none;
 }
 /* Lappen */

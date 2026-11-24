@@ -101,7 +101,8 @@
   /* Hälsningsväggen: lappens maxbredd (= spaltbredd), luft och
      "huller om buller". Under SMALL px bred vägg används SLOT_SMALL. */
   var WALL = { SLOT: 240, SLOT_SMALL: 160, SMALL: 600, GAP_X: 12, GAP_Y: 16, JIT_X: 8, JIT_Y: 6, TOP: 14,
-               SLOT_FUND: 170 };  /* insamlingssidan, desktop: väggen i vänsterspalten, mindre lappar */
+               SLOT_FUND: 170,    /* insamlingssidan, desktop: väggen i vänsterspalten, mindre lappar */
+               SLOT_SINGLE: 280 };  /* givarens tacksida: en spalt */
 
   /* ---------- Former (oregelbundna kanter) ---------- */
   /* clip-path-former i objectBoundingBox (0–1 = elementets bredd/höjd).
@@ -1243,8 +1244,9 @@
     /* Insamlingssidan på desktop: väggen ligger i vänsterspalten, spalterna
        fyller bredden från vänster. Annars centrerade spalter. */
     var left = !!box.closest('.uc-fund__head') && window.matchMedia('(min-width: 800px)').matches;
-    var slot = left ? WALL.SLOT_FUND : WALL.SMALL > cw ? WALL.SLOT_SMALL : WALL.SLOT;
-    var cols = Math.max(1, Math.floor((cw + WALL.GAP_X) / (slot + WALL.GAP_X)));
+    var single = !!box.closest('.swish-landing');    /* givarens tacksida: en spalt med lappar */
+    var slot = single ? Math.min(cw, WALL.SLOT_SINGLE) : left ? WALL.SLOT_FUND : WALL.SMALL > cw ? WALL.SLOT_SMALL : WALL.SLOT;
+    var cols = single ? 1 : Math.max(1, Math.floor((cw + WALL.GAP_X) / (slot + WALL.GAP_X)));
     if (left) slot = (cw - (cols - 1) * WALL.GAP_X) / cols;
     box.classList.toggle('uc-wall--small', slot < 200);
     box.style.setProperty('--uc-note-max', slot + 'px');
@@ -1265,7 +1267,7 @@
     box.style.height = Math.round(Math.max.apply(null, colH)) + 'px';
   }
   function greetingWall() {
-    var box = document.querySelector('.p2p-transaction-landing .leaderboard-records');
+    var box = document.querySelector('.p2p-transaction-landing .leaderboard-records, .swish-landing .leaderboard-records');
     if (!box) return;
     var t = null;
     var render = function () {
