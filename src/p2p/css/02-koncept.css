@@ -499,6 +499,7 @@ html.uc-fund-page #wrap-default {
     --uc-fund-gap:   clamp(40px, 8vw, 128px);
     --uc-fund-form:  320px;                        /* formulärets bredd */
     --uc-fund-lines: 6;                            /* mobil: rader före Läs mer */
+    --uc-fund-overlap: 0.3;                        /* hur långt rubriken får gå in över bilden (andel av bildens bredd) */
     display: grid;
     grid-template-columns: minmax(0, var(--uc-fund-side)) minmax(0, 1fr);
     column-gap: var(--uc-fund-gap);
@@ -549,13 +550,13 @@ html.uc-fund-page #wrap-default {
     z-index: 2;                        /* rubriken ligger över bilden */
     padding-top: calc((100cqi - var(--uc-fund-side) - var(--uc-fund-gap)) * 0.3);
 }
-.uc-fund--noimg > .uc-fund__head {
-    padding-top: 0;
-}
-/* Rubriken: handstil i rött, får gå in över bilden */
+/* Rubriken: handstil i rött, får gå in över bilden, men bara
+   --uc-fund-overlap av bildens bredd. Ord som inte ryms på en rad
+   krymper rubriken i stället för att brytas (fitTitle i scriptet). */
 .uc-fund .uc-fund__title {
     width: max-content;
-    max-width: min(860px, 72cqi);
+    max-width: calc(var(--uc-fund-side) + var(--uc-fund-gap)
+                    + (100cqi - var(--uc-fund-side) - var(--uc-fund-gap)) * var(--uc-fund-overlap));
     margin: 0;
     font-family: var(--font-hand);
     font-weight: normal;
@@ -564,7 +565,8 @@ html.uc-fund-page #wrap-default {
     letter-spacing: normal;
     text-transform: uppercase;
     text-wrap: balance;
-    overflow-wrap: break-word;
+    overflow-wrap: normal;             /* hela ord; fitTitle krymper vid behov */
+    hyphens: manual;
     color: var(--uc-red);
 }
 /* "10 000 KR insamlat" */
@@ -620,9 +622,6 @@ html.uc-fund-page #wrap-default {
     text-align: left;
     color: var(--uc-concept-ink);
 }
-.uc-fund--noimg .uc-fund__give {
-    margin-top: 0;
-}
 .uc-fund :is(.show_swish_reward_form, #showText, #errorText, #swish_form_underlay_text) {
     width: 100%;
     max-width: var(--uc-fund-form);
@@ -657,9 +656,6 @@ html.uc-fund-page #wrap-default {
         padding-top: 0;
         margin-top: -0.55em;           /* rubriken lägger sig över bildens nederkant */
         font-size: clamp(4.4rem, 13vw, 7.2rem);        /* = rubrikens storlek, för em ovan */
-    }
-    .uc-fund--noimg > .uc-fund__head {
-        margin-top: var(--sp-6);
     }
     .uc-fund .uc-fund__title {
         max-width: 100%;
@@ -703,6 +699,66 @@ html.uc-fund-page #wrap-default {
         width: 100%;                   /* plattformens 320px: fälten i linje med rubriken */
         margin-left: 0;
         margin-right: 0;
+    }
+    .uc-fund .show_swish_reward_form .input-group .cc-input {
+        width: 100%;                   /* fältet fyller gruppen, så etiketten hamnar inne i fältet */
+    }
+}
+
+/* 10.6 Utan bild (insamlaren laddade inte upp någon, .uc-fund--noimg):
+   en centrerad spalt. Rubriken får hela bredden, sedan summa, knapp,
+   beskrivning, "Din gåva", formuläret och väggen. Gäller alla bredder. */
+.p2p-transaction-landing #phase-swish-result > .wrapper.uc-fund.uc-fund--noimg {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    min-height: 0;
+    text-align: center;
+}
+.uc-fund--noimg > *,
+.uc-fund--noimg > .uc-fund__head {
+    grid-column: 1;
+    grid-row: auto;
+}
+.uc-fund--noimg > .uc-fund__head {
+    width: 100%;
+    max-width: 880px;
+    margin-top: 0;
+    padding-top: 0;
+}
+.uc-fund--noimg .uc-fund__title {
+    width: auto;
+    max-width: 100%;
+    margin-inline: auto;
+    font-size: clamp(4.8rem, 8cqi, 9.6rem);        /* 48–96px */
+}
+.uc-fund--noimg .uc-fund__desc-text {
+    max-width: 640px;
+    margin-inline: auto;
+}
+.uc-fund--noimg .uc-fund__give {
+    margin-top: 80px;
+    text-align: center;
+}
+.uc-fund--noimg :is(.show_swish_reward_form, #showText, #errorText, #swish_form_underlay_text) {
+    margin-left: auto;
+    margin-right: auto;
+}
+.uc-fund--noimg #swish_form_underlay_text {
+    text-align: center;
+}
+.uc-fund--noimg > .leaderboard {
+    justify-self: stretch;
+    text-align: left;
+}
+@media (max-width: 799px) {
+    .p2p-transaction-landing #phase-swish-result > .wrapper.uc-fund.uc-fund--noimg {
+        padding-top: var(--sp-7);
+    }
+    .uc-fund--noimg .uc-fund__title {
+        font-size: clamp(4.4rem, 13vw, 7.2rem);
+    }
+    .uc-fund--noimg .uc-fund__give {
+        margin-top: var(--sp-7);
     }
 }
 

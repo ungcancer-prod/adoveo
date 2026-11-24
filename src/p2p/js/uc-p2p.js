@@ -906,7 +906,31 @@
     noImg();
 
     fundDescription(head);
+    fitTitle(head.querySelector('.uc-fund__title'));
     fundSum(sumNum, sum);
+  }
+
+  /* Rubriken bryter bara mellan ord. Är ett ord längre än raden
+     (t.ex. FÖDELSEDAGSINSAMLING på mobil) krymps rubriken tills det ryms. */
+  function fitTitle(t) {
+    if (!t) return;
+    var busy = false;
+    var fit = function () {
+      if (busy) return;
+      busy = true;
+      t.style.fontSize = '';
+      var size = parseFloat(getComputedStyle(t).fontSize);
+      for (var i = 0; i < 30 && size > 24 && t.scrollWidth > t.clientWidth + 1; i++) {
+        size = Math.floor(size * 0.94);
+        t.style.fontSize = size + 'px';
+      }
+      busy = false;
+    };
+    fit();
+    window.addEventListener('resize', fit);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
+    var w = t.closest('.wrapper');
+    if (w) new MutationObserver(fit).observe(w, { attributes: true, attributeFilter: ['class'] });
   }
 
   /* Mobil: beskrivningen visar --uc-fund-lines rader (CSS) och en
