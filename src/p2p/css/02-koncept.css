@@ -415,17 +415,49 @@ html.uc-noimg #coupon-page-title::after {
     text-transform: none;
     white-space: pre-line;
 }
+/* Insamlingsmålet: förifyllt med förslag och snabbval (goalDefault i scriptet) */
+.uc-goal {
+    margin: calc(-1 * var(--sp-1)) 0 var(--sp-4);
+    text-align: left;
+    color: var(--uc-concept-ink);
+}
+.uc-goal__hint {
+    margin: 0 0 var(--sp-2);
+    font-family: var(--font-body);
+    font-size: 1.4rem;                 /* 14px */
+    line-height: 1.4;
+}
+.uc-goal__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+}
+.uc-goal__chip {
+    padding: 4px 8px;
+    border: var(--border-w) solid var(--uc-concept-ink);
+    background: transparent;
+    color: var(--uc-concept-ink);
+    font-family: var(--font-head);
+    font-size: 1.4rem;                 /* 14px */
+    text-transform: uppercase;
+    cursor: pointer;
+}
+.uc-goal__chip.is-on {
+    background: var(--uc-concept-ink);
+    color: var(--uc-concept-bg);
+}
 
 /* =========================================
    10. P2P — INSAMLINGSSIDAN (/p/<hash>)
    Varje insamlares egen sida. body.p2p-transaction-landing, fas
    #phase-swish-result. Plattformen ger en smal spalt; scriptet
-   (fundraiserPage) bygger rubrik, summa, knapp och beskrivning till
-   .uc-fund__head och sätter .uc-fund på wrappern. Då blir sidan:
-     desktop: blocket till vänster (rubriken går in över bilden),
-              bild, "Din gåva", formulär och vägg till höger
-     mobil:   bild, rubrik, summa, knapp, beskrivning (kortad med
-              Läs mer), formulär, vägg
+   (fundraiserPage) sätter .uc-fund på wrappern och bygger två block:
+   .uc-fund__head (rubrik, beskrivning, summan per koncept, vägg) och
+   .uc-fund__side (Din gåva + formuläret). Då blir sidan:
+     desktop: bilden överst (liggande kant i kant, stående lika bred som
+              innehållet), under den vänsterspalten och formuläret till
+              höger, som följer med när man scrollar
+     mobil:   bild, rubrik, beskrivning (Läs mer), summa, formulär, vägg
    10.0 gäller också om scriptet inte hunnit/kunnat köra.
    ========================================= */
 /* 10.0 Grund (utan scriptet): plattformens spalt, centrerad */
@@ -494,76 +526,88 @@ html.uc-fund-page #wrap-default {
     max-width: none;
     margin: 0;
 }
+/* Två spalter: vänster (.uc-fund__head) rubrik, beskrivning, summa och
+   hälsningsväggen; höger (.uc-fund__side) formuläret, som följer med
+   när man scrollar. Bilden (om den finns) ligger överst över båda. */
 .p2p-transaction-landing #phase-swish-result > .wrapper.uc-fund {
-    --uc-fund-side:  310px;                        /* vänsterspalten */
-    --uc-fund-gap:   clamp(40px, 8vw, 128px);
     --uc-fund-form:  320px;                        /* formulärets bredd */
-    --uc-fund-lines: 6;                            /* mobil: rader före Läs mer */
-    --uc-fund-overlap: 0.3;                        /* hur långt rubriken får gå in över bilden (andel av bildens bredd) */
+    --uc-fund-gap:   clamp(40px, 8vw, 128px);
+    --uc-fund-lines: 8;                            /* rader före Läs mer (mobil: 6, se 10.5) */
     display: grid;
-    grid-template-columns: minmax(0, var(--uc-fund-side)) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) var(--uc-fund-form);
     column-gap: var(--uc-fund-gap);
     align-items: start;
-    container-type: inline-size;                   /* cqi nedan = innehållets bredd */
     box-sizing: border-box;
     width: 100%;
     max-width: none;
-    min-height: 80vh;
     margin: 0;
     padding: 64px max(var(--sp-6), calc((100% - 1200px) / 2)) 96px;
     text-align: left;
 }
 .uc-fund > * {
-    grid-column: 2;
+    grid-column: 1;
     min-width: 0;
 }
 .uc-fund > .uc-fund__source {
     display: none;                     /* titelraden: innehållet är flyttat till .uc-fund__head */
 }
+.uc-fund > .uc-fund__head {
+    grid-column: 1;
+    grid-row: 2;
+}
+.uc-fund > .uc-fund__side {
+    grid-column: 2;
+    grid-row: 2;
+    position: sticky;                  /* formuläret följer med ner */
+    top: var(--sp-5);
+}
+.uc-fund--noimg > :is(.uc-fund__head, .uc-fund__side) {
+    grid-row: 1;
+}
 
-/* 10.2 Bilden: stående 4:5, oregelbunden kant */
-.uc-fund #page-title-swish-form {
-    margin: 0;
+/* 10.2 Bilden överst. Liggande bild (.uc-fund--wide): kant i kant.
+   Stående bild: lika bred som innehållet. Bilden beskärs med fokus en
+   tredjedel ner, där ansikten oftast sitter. Scriptet sätter klasserna. */
+.uc-fund > #page-title-swish-form {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    margin: 0 0 64px;
     padding: 0;
+}
+.uc-fund--wide > #page-title-swish-form {
+    justify-self: start;
+    width: 100vw;
+    max-width: none;
+    margin-top: -64px;                 /* = wrapperns padding: bilden ligger an mot headern */
+    margin-left: calc((100% - 100vw) / 2);
 }
 .uc-fund #page-title-swish-form img {
     display: block;
     width: 100%;
-    height: auto;
-    aspect-ratio: 4 / 5;
+    height: 80vh;
+    max-height: 900px;
     object-fit: cover;
+    object-position: 50% 30%;
     margin: 0;
     border: 0;
     border-radius: 0;
-    clip-path: var(--uc-clip);
 }
-.uc-fund--noimg #page-title-swish-form {
+.uc-fund--wide #page-title-swish-form img {
+    height: 72vh;
+}
+.uc-fund--noimg > #page-title-swish-form {
     display: none;
 }
 
-/* 10.3 Vänsterspalten. Börjar en bit ner i bilden (ca en fjärdedel av
-   bildens höjd) och spänner över alla rader till höger. */
-.uc-fund > .uc-fund__head {
-    grid-column: 1;
-    grid-row: 1 / span 12;
-    position: relative;
-    z-index: 2;                        /* rubriken ligger över bilden */
-    padding-top: calc((100cqi - var(--uc-fund-side) - var(--uc-fund-gap)) * 0.3);
-}
-.uc-fund--noimg > .uc-fund__head {
-    padding-top: 0;
-}
-/* Rubriken: handstil i rött, får gå in över bilden, men bara
-   --uc-fund-overlap av bildens bredd. Ord som inte ryms på en rad
-   krymper rubriken i stället för att brytas (fitTitle i scriptet). */
+/* 10.3 Vänsterspalten */
+/* Rubriken: handstil i rött. Ord som inte ryms på en rad krymper
+   rubriken i stället för att brytas (fitTitle i scriptet). */
 .uc-fund .uc-fund__title {
-    width: max-content;
-    max-width: calc(var(--uc-fund-side) + var(--uc-fund-gap)
-                    + (100cqi - var(--uc-fund-side) - var(--uc-fund-gap)) * var(--uc-fund-overlap));
+    max-width: 100%;
     margin: 0;
     font-family: var(--font-hand);
     font-weight: normal;
-    font-size: clamp(4.8rem, 9cqi, 11.2rem);       /* 48–112px */
+    font-size: clamp(4.8rem, 7vw, 11.2rem);        /* 48–112px */
     line-height: 1.02;
     letter-spacing: normal;
     text-transform: uppercase;
@@ -572,51 +616,9 @@ html.uc-fund-page #wrap-default {
     hyphens: manual;
     color: var(--uc-red);
 }
-/* Utan bild (desktop): rubriken, summan och beskrivningen i en bred
-   vänsterspalt, formuläret i sin smala spalt till höger. */
-@media (min-width: 800px) {
-    .p2p-transaction-landing #phase-swish-result > .wrapper.uc-fund.uc-fund--noimg {
-        grid-template-columns: minmax(0, 1fr) var(--uc-fund-form);
-        min-height: 0;
-    }
-    .uc-fund--noimg .uc-fund__title {
-        max-width: 100%;
-    }
-}
-/* "10 000 KR insamlat" */
-.uc-fund .uc-fund__sum {
-    margin: var(--sp-5) 0 0;
-    font-family: var(--font-body);
-    font-size: var(--fs-h4);           /* 20px */
-    line-height: 1.2;
-    color: var(--uc-concept-ink);
-}
-.uc-fund .uc-fund__sum strong {
-    font-family: var(--font-head);
-    font-weight: normal;
-    font-size: var(--fs-h2);           /* 32px */
-    letter-spacing: var(--track-tight);
-    text-transform: uppercase;
-}
-/* Gåva & hälsning: kontur i ytans textfärg (syns på ljus och mörk yta) */
-.uc-fund .uc-fund__cta {
-    margin: var(--sp-5) 0 0;
-    color: var(--uc-concept-ink);
-    background-color: transparent;     /* temat ger knappar vit fyllning på mobil */
-    border-color: var(--uc-concept-ink);
-    text-decoration: none;
-}
-.uc-fund .uc-fund__cta.is-hidden {
-    display: none;                     /* formuläret syns redan (fundCta i scriptet) */
-}
-.uc-fund .uc-fund__cta:hover {
-    background-color: var(--uc-concept-ink);
-    border-color: var(--uc-concept-ink);
-    color: var(--uc-concept-bg);
-}
-/* Beskrivningen */
+/* Beskrivningen: ca 60 tecken per rad, kortas med Läs mer */
 .uc-fund__desc {
-    margin-top: var(--sp-7);
+    margin-top: var(--sp-5);
 }
 .uc-fund .uc-fund__desc-text {
     display: block;
@@ -629,16 +631,124 @@ html.uc-fund-page #wrap-default {
     overflow-wrap: break-word;
     color: var(--uc-concept-ink);
 }
+.uc-fund__desc:not(.is-open) .uc-fund__desc-text {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: var(--uc-fund-lines);
+    overflow: hidden;
+}
 .uc-fund__more {
-    display: none;                     /* bara mobil, och bara när texten är kortad */
+    display: none;                     /* bara när texten faktiskt är kortad */
+}
+.uc-fund__desc.is-long .uc-fund__more,
+.uc-fund__desc.is-open .uc-fund__more {
+    display: inline-block;
+    margin: var(--sp-2) 0 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    font-family: var(--font-body);
+    font-size: var(--fs-body);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    color: var(--uc-concept-ink);
+    cursor: pointer;
+}
+/* Insamlat per koncept (FUND_SHOW i scriptet):
+   .uc-fund__meter         Utmaning: stor summa, procent och tjock mätare
+   .uc-fund__meter--small  Födelsedag: liten summa och tunn mätare
+   .uc-fund__impact        Till minne: summan till unga vuxna, ingen mätare
+   .uc-fund__formsum       Pepp: en rad ovanför formuläret */
+.uc-fund__meter {
+    max-width: 560px;
+    margin-top: var(--sp-6);
+    font-family: var(--font-body);
+    font-size: var(--fs-body);
+    color: var(--uc-concept-ink);
+}
+.uc-fund__meter-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--sp-4);
+}
+.uc-fund__meter-sum {
+    font-family: var(--font-head);
+    font-size: 5.6rem;                 /* 56px */
+    line-height: 1;
+    text-transform: uppercase;
+}
+.uc-fund__meter-pct {
+    font-family: var(--font-head);
+    font-size: var(--fs-h2);           /* 32px */
+}
+.uc-fund__bar {
+    position: relative;
+    height: 16px;
+    margin: var(--sp-3) 0 var(--sp-2);
+    border: var(--border-w) solid var(--uc-concept-ink);
+}
+.uc-fund__bar > i {
+    position: absolute;
+    inset: 0 auto 0 0;
+    background: var(--uc-concept-ink);
+}
+.uc-fund__meter--small .uc-fund__meter-row {
+    justify-content: flex-start;
+    gap: var(--sp-2);
+    font-size: var(--fs-h4);           /* 20px */
+}
+.uc-fund__meter--small .uc-fund__meter-sum {
+    font-size: 2.8rem;                 /* 28px */
+}
+.uc-fund__meter--small .uc-fund__bar {
+    height: 8px;
+    margin-bottom: 0;
+    border-width: 1.5px;
+}
+.uc-fund__impact {
+    margin-top: var(--sp-6);
+    font-family: var(--font-body);
+    font-size: var(--fs-body);
+    color: var(--uc-concept-ink);
+}
+.uc-fund__impact-sum {
+    font-family: var(--font-head);
+    font-size: 6.4rem;                 /* 64px */
+    line-height: 1;
+    text-transform: uppercase;
+}
+.uc-fund__impact-hand {
+    margin-top: var(--sp-2);
+    font-family: var(--font-hand);
+    font-size: 2.6rem;                 /* 26px */
+    line-height: 1.1;
+    text-transform: uppercase;
+    color: var(--uc-red);
+}
+/* Hälsningsväggen i vänsterspalten (layoutWall: vänsterställda spalter) */
+.uc-fund .uc-fund__head > .leaderboard {
+    margin-top: 40px;
 }
 
-/* 10.4 "Din gåva" + formuläret: vänsterställt under bilden */
+/* 10.4 Högerspalten: "Din gåva" + formuläret, vänsterställt */
 .uc-fund .uc-fund__give {
-    margin: 64px 0 var(--sp-5);
+    margin: 0 0 var(--sp-5);
     font-size: var(--fs-h1);           /* 44px */
     text-align: left;
     color: var(--uc-concept-ink);
+}
+.uc-fund__formsum {
+    margin: calc(-1 * var(--sp-2)) 0 var(--sp-5);
+    font-family: var(--font-body);
+    font-size: 1.8rem;                 /* 18px */
+    color: var(--uc-concept-ink);
+}
+.uc-fund__formsum strong {
+    font-family: var(--font-head);
+    font-weight: normal;
+    font-size: 2.8rem;                 /* 28px */
+    text-transform: uppercase;
 }
 .uc-fund :is(.show_swish_reward_form, #showText, #errorText, #swish_form_underlay_text) {
     width: 100%;
@@ -649,9 +759,6 @@ html.uc-fund-page #wrap-default {
 .uc-fund #swish_form_underlay_text {
     margin-top: var(--sp-4);
     text-align: left;
-}
-.uc-fund--noimg .uc-fund__give {
-    margin-top: 0;
 }
 /* Formuläret vänsterställt: beloppsknappar, kryssruta och Swisha-knapp
    i samma kant som fälten (plattformen centrerar dem) */
@@ -669,69 +776,59 @@ html.uc-fund-page #wrap-default {
     margin-right: 0;
 }
 
-/* 10.5 Mobil: en spalt, bilden kant i kant, rubriken in över bildens nederkant */
+/* 10.5 Mobil: en spalt. Bilden kant i kant och rubriken in över dess
+   nederkant. Vänster- och högerspalten öppnas (display: contents) så att
+   ordningen kan bli: bild, rubrik, beskrivning, summa, formulär, vägg. */
 @media (max-width: 799px) {
     .p2p-transaction-landing #phase-swish-result > .wrapper.uc-fund {
+        --uc-fund-lines: 6;
         grid-template-columns: minmax(0, 1fr);
-        min-height: 0;
         padding: 0 0 64px;
     }
+    .uc-fund > :is(.uc-fund__head, .uc-fund__side) {
+        display: contents;
+    }
     .uc-fund > *,
-    .uc-fund > .uc-fund__head {
+    .uc-fund > :is(.uc-fund__head, .uc-fund__side) > * {
         grid-column: 1;
         grid-row: auto;
+        min-width: 0;
         padding-inline: var(--sp-4);
+        box-sizing: border-box;
     }
     .uc-fund > #page-title-swish-form {
+        order: 0;
+        width: auto;
+        margin: 0;
         padding: 0;
     }
-    .uc-fund #page-title-swish-form img {
+    .uc-fund #page-title-swish-form img,
+    .uc-fund--wide #page-title-swish-form img {
+        height: auto;
+        max-height: none;
         aspect-ratio: 1 / 1;
     }
-    .uc-fund > .uc-fund__head {
-        padding-top: 0;
+    .uc-fund__head > .uc-fund__title {
+        order: 1;
         margin-top: -0.55em;           /* rubriken lägger sig över bildens nederkant */
-        font-size: clamp(4.4rem, 13vw, 7.2rem);        /* = rubrikens storlek, för em ovan */
+        font-size: clamp(4.4rem, 13vw, 7.2rem);
     }
-    .uc-fund--noimg > .uc-fund__head {
+    .uc-fund--noimg .uc-fund__head > .uc-fund__title {
         margin-top: var(--sp-6);
     }
-    .uc-fund .uc-fund__title {
-        max-width: 100%;
-        font-size: 1em;
-    }
-    .uc-fund .uc-fund__cta {
-        display: none;                 /* mobil: beskrivningen direkt under summan i stället */
-    }
+    .uc-fund__head > .uc-fund__desc { order: 2; }
+    .uc-fund__head > :is(.uc-fund__meter, .uc-fund__impact) { order: 3; }
+    .uc-fund__side > * { order: 4; }
+    .uc-fund__head > .leaderboard { order: 5; }
     .uc-fund .uc-fund__desc-text {
         max-width: none;
-    }
-    .uc-fund .uc-fund__desc-text {
         font-size: var(--fs-body) !important;   /* 16px (se ovan) */
     }
     .uc-fund__desc {
         margin-top: var(--sp-6);
     }
-    /* Kortad beskrivning: --uc-fund-lines rader, sedan Läs mer */
-    .uc-fund__desc:not(.is-open) .uc-fund__desc-text {
-        display: -webkit-box;
-        -webkit-box-orient: vertical;
-        -webkit-line-clamp: var(--uc-fund-lines);
-        overflow: hidden;
-    }
-    .uc-fund__desc.is-long .uc-fund__more,
-    .uc-fund__desc.is-open .uc-fund__more {
-        display: inline-block;
-        margin: var(--sp-2) 0 0;
-        padding: 0;
-        border: 0;
-        background: none;
-        font-family: var(--font-body);
-        font-size: var(--fs-body);
-        text-decoration: underline;
-        text-underline-offset: 3px;
-        color: var(--uc-concept-ink);
-        cursor: pointer;
+    .uc-fund__meter-sum {
+        font-size: 4.4rem;             /* 44px */
     }
     .uc-fund .uc-fund__give {
         margin-top: var(--sp-7);
@@ -747,6 +844,9 @@ html.uc-fund-page #wrap-default {
     }
     .uc-fund .show_swish_reward_form .input-group .cc-input {
         width: 100%;                   /* fältet fyller gruppen, så etiketten hamnar inne i fältet */
+    }
+    .uc-fund .uc-fund__head > .leaderboard {
+        margin-top: 64px;
     }
 }
 

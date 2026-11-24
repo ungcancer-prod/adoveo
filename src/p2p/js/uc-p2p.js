@@ -71,15 +71,36 @@
   /* Texterna som scriptet lägger till. Rubrik, beskrivning och bild
      kommer från insamlaren; formulärets etiketter från admin. */
   var FUND_TEXT = {
-    cta: 'Gåva & hälsning',        /* knappen under summan, leder till formuläret */
     give: 'Din gåva',              /* rubriken ovanför formuläret */
+    givePepp: 'Din pepp & gåva',   /* rubriken ovanför formuläret på Pepp */
+    messagePepp: 'Din pepp',       /* hälsningsfältets etikett på Pepp */
+    of: 'av',                      /* "650 kr av 1 000 kr" */
+    goal: 'av målet',              /* Utmaning: "av målet 1 000 kr" */
+    first: 'Bli först att ge',     /* när inget är insamlat än */
     collected: 'insamlat',
-    more: 'Läs mer',               /* mobil: beskrivningen kortas, se --uc-fund-lines i CSS */
+    impactPre: 'Tillsammans har vi samlat in',
+    impactPost: 'till unga vuxna som möter cancer och lever vidare',
+    formSum: 'insamlat till unga vuxna som möter cancer',
+    more: 'Läs mer',               /* beskrivningen kortas, se --uc-fund-lines i CSS */
     less: 'Visa mindre'
   };
+  /* Hur insamlat visas per koncept (kampanjens id, se MENU_MAIN):
+     meter = summa, procent och tjock mätare; small = liten summa och
+     tunn mätare; impact = summan till unga vuxna, ingen mätare;
+     form = en rad ovanför formuläret. */
+  var FUND_SHOW = { '297': 'meter', '295': 'small', '298': 'impact', '299': 'form' };
+  /* Insamlingsmålet. Beskrivningsmallen i admin märker ut det så här:
+     [mål:{custom_field_1}]. Scriptet läser siffran och tar bort märket. */
+  var GOAL_MARK = /\[\s*mål\s*:\s*([\d\s.,]*)\]/i;
+  /* Skapa-sidan: förvalt insamlingsmål och snabbval (fältet vars etikett
+     innehåller "mål"). */
+  var GOAL_DEFAULT = 1000;
+  var GOAL_CHOICES = [500, 1000, 2500, 5000];
+  var GOAL_HINT = 'Ett förslag. Ändra om du vill, ett mål som nås och slås känns bäst.';
   /* Hälsningsväggen: lappens maxbredd (= spaltbredd), luft och
      "huller om buller". Under SMALL px bred vägg används SLOT_SMALL. */
-  var WALL = { SLOT: 240, SLOT_SMALL: 160, SMALL: 600, GAP_X: 12, GAP_Y: 16, JIT_X: 8, JIT_Y: 6, TOP: 14 };
+  var WALL = { SLOT: 240, SLOT_SMALL: 160, SMALL: 600, GAP_X: 12, GAP_Y: 16, JIT_X: 8, JIT_Y: 6, TOP: 14,
+               SLOT_FUND: 170 };  /* insamlingssidan, desktop: väggen i vänsterspalten, mindre lappar */
 
   /* ---------- Former (oregelbundna kanter) ---------- */
   /* clip-path-former i objectBoundingBox (0–1 = elementets bredd/höjd).
@@ -784,6 +805,7 @@
       for (var round = 0; round !== 5; round++) {
         var w = document.createTreeWalker(msg, NodeFilter.SHOW_TEXT), t = null, m = null;
         while (w.nextNode()) {
+          if (GOAL_MARK.test(w.currentNode.nodeValue)) w.currentNode.nodeValue = w.currentNode.nodeValue.replace(GOAL_MARK, '');
           m = w.currentNode.nodeValue.match(/\{(your_name|description)\}/);
           if (m) { t = w.currentNode; break; }
         }
@@ -837,6 +859,47 @@
     }
   }
 
+  /* Skapa-sidan: insamlingsmålet förifyllt (GOAL_DEFAULT) med snabbval.
+     Fältet hittas på etiketten ("mål"), så det spelar ingen roll vilket
+     custom field det är. Finns inget sådant fält görs ingenting. */
+  function goalDefault() {
+    var phase = document.getElementById('phase-before-coupon');
+    if (!phase || phase.querySelector('.uc-goal')) return;
+    var field = null;
+    phase.querySelectorAll('input[id^="custom_field_"]').forEach(function (i) {
+      var g = i.closest('.input-group');
+      var l = g && g.querySelector('label');
+      if (!field && /mål/i.test((l && l.textContent) || i.placeholder || '')) field = i;
+    });
+    if (!field) return;
+    var set = function (v) {
+      field.value = v;
+      field.dispatchEvent(new Event('input', { bubbles: true }));
+      field.dispatchEvent(new Event('change', { bubbles: true }));
+    };
+    if (!field.value) set(GOAL_DEFAULT);
+    var box = el('div', 'uc-goal');
+    box.appendChild(el('p', 'uc-goal__hint', GOAL_HINT));
+    var chips = el('div', 'uc-goal__chips');
+    var mark = function () {
+      Array.prototype.forEach.call(chips.children, function (b) {
+        b.classList.toggle('is-on', String(b.dataset.v) === String(field.value));
+      });
+    };
+    GOAL_CHOICES.forEach(function (v) {
+      var b = el('button', 'uc-goal__chip', kr(v));
+      b.type = 'button';
+      b.dataset.v = v;
+      b.addEventListener('click', function () { set(v); mark(); });
+      chips.appendChild(b);
+    });
+    box.appendChild(chips);
+    field.addEventListener('input', mark);
+    var g = field.closest('.input-group') || field;
+    g.parentNode.insertBefore(box, g.nextSibling);
+    mark();
+  }
+
   /* ---------- Insamlingssidan: rubrik, bild, summa, formulär ---------- */
   /* Varje insamlares sida (/p/<kod>). Plattformen ger en smal spalt:
      bild, titelrad (#page-subtitle: rubriken som text, beskrivningen
@@ -850,6 +913,8 @@
     var sub = document.getElementById('page-subtitle');
     var media = document.getElementById('page-title-swish-form');
     if (!wrap || !sub || !media || wrap.classList.contains('uc-fund')) return;
+    var camp = (document.getElementById('campaign-id') || {}).value;
+    var show = FUND_SHOW[camp] || 'small';
 
     /* Titelraden: texten före <span> är rubriken, <span> beskrivningen */
     var desc = sub.querySelector('span');
@@ -858,17 +923,11 @@
       if (n.nodeType === 3) title += n.nodeValue;
     }
     title = title.replace(/\s+/g, ' ').trim();
+    var goal = desc ? takeGoal(desc) : 0;
 
+    /* Vänsterspalten: rubrik, beskrivning, insamlat, vägg */
     var head = el('div', 'uc-fund__head');
     head.appendChild(el('h1', 'uc-fund__title', title));
-    var sum = el('p', 'uc-fund__sum');
-    var sumNum = el('strong', null, ' ');
-    sum.appendChild(sumNum);
-    sum.appendChild(document.createTextNode(' ' + FUND_TEXT.collected));
-    head.appendChild(sum);
-    var cta = el('a', 'cc-button uc-fund__cta', FUND_TEXT.cta);
-    cta.href = '#din-gava';
-    head.appendChild(cta);
     if (desc && desc.textContent.trim()) {
       var box = el('div', 'uc-fund__desc');
       desc.className = 'uc-fund__desc-text';
@@ -879,54 +938,103 @@
       box.appendChild(more);
       head.appendChild(box);
     }
+    var shown = el('div');
+    shown.hidden = true;
+    if (show !== 'form') head.appendChild(shown);
+    var wall = wrap.querySelector(':scope > .leaderboard');
+    if (wall) head.appendChild(wall);
     sub.classList.add('uc-fund__source');           /* tom nu: döljs i CSS */
     media.parentNode.insertBefore(head, media.nextSibling);
 
-    /* Rubriken ovanför formuläret. Före #showText, så att Swish-
-       instruktionen hamnar under den när man tryckt på Swisha. */
-    var form = document.querySelector('#phase-swish-result .show_swish_reward_form');
-    var before = document.getElementById('showText') || form;
-    if (before && before.parentNode === wrap && !document.getElementById('din-gava')) {
-      var h2 = el('h2', 'uc-fund__give', FUND_TEXT.give);
-      h2.id = 'din-gava';
-      wrap.insertBefore(h2, before);
+    /* Högerspalten: Din gåva + formuläret. Plattformens element flyttas
+       hit i sin ordning (Swish-instruktionen #showText under rubriken). */
+    var side = el('div', 'uc-fund__side');
+    var h2 = el('h2', 'uc-fund__give', show === 'form' ? FUND_TEXT.givePepp : FUND_TEXT.give);
+    h2.id = 'din-gava';
+    side.appendChild(h2);
+    if (show === 'form') side.appendChild(shown);
+    ['#showText', '#errorText', '.show_swish_reward_form', '#swish_form_underlay_text'].forEach(function (q) {
+      var e = wrap.querySelector(':scope > ' + q);
+      if (e) side.appendChild(e);
+    });
+    head.parentNode.insertBefore(side, head.nextSibling);
+    if (show === 'form') {
+      var msg = document.getElementById('message');
+      var lab = msg && msg.parentNode ? msg.parentNode.querySelector('label') : null;
+      if (lab) lab.textContent = FUND_TEXT.messagePepp;
     }
 
     wrap.classList.add('uc-fund');
     root.classList.add('uc-fund-page');
 
-    /* Ingen bild (insamlaren laddade inte upp någon): bildytan tas bort */
+    /* Bilden: ingen = bildytan tas bort; liggande = kant i kant */
     var img = media.querySelector('img');
-    var noImg = function () {
+    var shape = function () {
       var bad = !img || !img.getAttribute('src') || (img.complete && img.naturalWidth === 0);
       wrap.classList.toggle('uc-fund--noimg', bad);
+      wrap.classList.toggle('uc-fund--wide', !bad && img.naturalWidth > img.naturalHeight);
     };
     if (img) img.removeAttribute('style');           /* plattformen: 150px rund, inline */
-    if (img) { img.alt = ''; img.addEventListener('load', noImg); img.addEventListener('error', noImg); }
-    noImg();
+    if (img) { img.alt = ''; img.addEventListener('load', shape); img.addEventListener('error', shape); }
+    shape();
 
     fundDescription(head);
     fitTitle(head.querySelector('.uc-fund__title'));
-    fundCta(cta, wrap);
-    fundSum(sumNum, sum);
+    fundSum(function (sum) { fundShown(shown, show, sum, goal); });
   }
 
-  /* Gåva & hälsning flyttar ner till formuläret. Syns formuläret redan
-     när sidan laddas (t.ex. desktop utan bild) behövs knappen inte.
-     På mobil döljs den alltid i CSS. */
-  function fundCta(cta, wrap) {
-    var form = wrap.querySelector('.show_swish_reward_form');
-    if (!form) return;
-    var check = function () {
-      var top = form.getBoundingClientRect().top + window.scrollY;
-      cta.classList.toggle('is-hidden', top < window.innerHeight - 80);
+  /* Målet ur beskrivningen: [mål:1000] läses och tas bort ur texten */
+  function takeGoal(desc) {
+    var goal = 0;
+    var w = document.createTreeWalker(desc, NodeFilter.SHOW_TEXT);
+    while (w.nextNode()) {
+      var t = w.currentNode, m = t.nodeValue.match(GOAL_MARK);
+      if (!m) continue;
+      goal = parseInt(m[1].replace(/\D/g, ''), 10) || 0;
+      t.nodeValue = t.nodeValue.replace(GOAL_MARK, '').replace(/[ \t]+$/, '');
+    }
+    return goal;
+  }
+
+  /* Insamlat, olika per koncept (FUND_SHOW). Utan mål: bara summan. */
+  function fundShown(box, show, sum, goal) {
+    if (sum == null) return;
+    var pct = goal ? Math.round(sum / goal * 100) : 0;
+    var bar = function () {
+      var b = el('div', 'uc-fund__bar');
+      var f = el('i');
+      f.style.width = Math.min(pct, 100) + '%';
+      b.appendChild(f);
+      return b;
     };
-    check();
-    window.addEventListener('resize', check);
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(check);
-    var img = wrap.querySelector('#page-title-swish-form img');
-    if (img) img.addEventListener('load', check);
-    new MutationObserver(check).observe(wrap, { attributes: true, attributeFilter: ['class'] });
+    box.textContent = '';
+    if (show === 'impact') {
+      box.className = 'uc-fund__impact';
+      box.appendChild(el('div', null, FUND_TEXT.impactPre));
+      box.appendChild(el('div', 'uc-fund__impact-sum', kr(sum)));
+      box.appendChild(el('div', 'uc-fund__impact-hand', FUND_TEXT.impactPost));
+    } else if (show === 'form') {
+      box.className = 'uc-fund__formsum';
+      box.appendChild(el('strong', null, kr(sum)));
+      box.appendChild(document.createTextNode(' ' + FUND_TEXT.formSum));
+    } else {
+      box.className = 'uc-fund__meter' + (show === 'small' ? ' uc-fund__meter--small' : '');
+      var row = el('div', 'uc-fund__meter-row');
+      if (!sum) {
+        row.appendChild(el('span', 'uc-fund__meter-sum', FUND_TEXT.first));
+      } else {
+        row.appendChild(el('span', 'uc-fund__meter-sum', kr(sum)));
+        if (goal && show === 'small') row.appendChild(el('span', null, FUND_TEXT.of + ' ' + kr(goal)));
+        if (goal && show === 'meter') row.appendChild(el('span', 'uc-fund__meter-pct', pct + ' %'));
+        if (!goal) row.appendChild(el('span', null, FUND_TEXT.collected));
+      }
+      box.appendChild(row);
+      if (goal) {
+        box.appendChild(bar());
+        if (show === 'meter') box.appendChild(el('div', null, FUND_TEXT.goal + ' ' + kr(goal)));
+      }
+    }
+    box.hidden = false;
   }
 
   /* Rubriken bryter bara mellan ord. Är ett ord längre än raden
@@ -978,10 +1086,10 @@
 
   /* Summan: sidan visar den inte. Den står på insamlingens kort i
      listan för konceptet (samma fråga som etiketterna på Summary). */
-  function fundSum(num, row) {
+  function fundSum(done) {
     var code = p2pCode(location.pathname);
     var camp = (document.getElementById('campaign-id') || {}).value;
-    if (!code || !camp) { row.hidden = true; return; }
+    if (!code || !camp) return;
     var q = new URLSearchParams({ offset: 0, limit: 1000, campaign_id: SUMMARY_ID, single_campaign_id: camp, folder: FOLDER });
     inLine(function () {
       return fetch('/getP2PCards?' + q, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
@@ -994,9 +1102,8 @@
         if (a && p2pCode(a.getAttribute('href')) === code) hit = c;
       });
       var sums = hit ? hit.querySelectorAll('span.cc-title') : [];
-      if (!sums.length) { row.hidden = true; return; }
-      num.textContent = kr(amountOf(sums[sums.length - 1].textContent));
-    }).catch(function () { row.hidden = true; });
+      if (sums.length) done(amountOf(sums[sums.length - 1].textContent));
+    }).catch(function () {});
   }
 
   /* ---------- Hälsningsväggen (leaderboarden på insamlingssidan) ---------- */
@@ -1037,12 +1144,16 @@
     });
     var cw = box.clientWidth;
     if (!notes.length || !cw) { box.style.height = ''; return; }
-    var slot = WALL.SMALL > cw ? WALL.SLOT_SMALL : WALL.SLOT;
-    box.classList.toggle('uc-wall--small', WALL.SMALL > cw);
-    box.style.setProperty('--uc-note-max', slot + 'px');
+    /* Insamlingssidan på desktop: väggen ligger i vänsterspalten, spalterna
+       fyller bredden från vänster. Annars centrerade spalter. */
+    var left = !!box.closest('.uc-fund__head') && window.matchMedia('(min-width: 800px)').matches;
+    var slot = left ? WALL.SLOT_FUND : WALL.SMALL > cw ? WALL.SLOT_SMALL : WALL.SLOT;
     var cols = Math.max(1, Math.floor((cw + WALL.GAP_X) / (slot + WALL.GAP_X)));
+    if (left) slot = (cw - (cols - 1) * WALL.GAP_X) / cols;
+    box.classList.toggle('uc-wall--small', slot < 200);
+    box.style.setProperty('--uc-note-max', slot + 'px');
     var blockW = cols * slot + (cols - 1) * WALL.GAP_X;
-    var offX = Math.max(0, (cw - blockW) / 2);      /* spalterna centrerade */
+    var offX = left ? 0 : Math.max(0, (cw - blockW) / 2);
     var colH = [];
     for (var k = 0; k !== cols; k++) colH.push(WALL.TOP);
     notes.forEach(function (n, i) {
@@ -1153,7 +1264,7 @@
 
     /* Varje del körs för sig: kraschar en, fungerar resten ändå
        (t.ex. att headern göms vid scroll) */
-    [buildFooter, buildHero, conceptCards, formatPrices, buildTotal, makeAnchors, fundraiserCards, conceptSteps, inlineQr, createLayout, fundraiserPage, greetingWall].forEach(function (fn) {
+    [buildFooter, buildHero, conceptCards, formatPrices, buildTotal, makeAnchors, fundraiserCards, conceptSteps, inlineQr, createLayout, goalDefault, fundraiserPage, greetingWall].forEach(function (fn) {
       try { fn(); } catch (e) { if (window.console) console.warn('[uc-p2p] ' + fn.name, e); }
     });
 
