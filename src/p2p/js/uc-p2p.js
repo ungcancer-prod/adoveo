@@ -79,7 +79,7 @@
     goalOnly: 'Mål:',              /* 0 kr: bara målet visas, ingen mätare */
     collected: 'insamlat',
     impactPre: 'Tillsammans har vi samlat in',
-    impactPost: 'till unga vuxna som möter cancer och lever vidare',
+    impactPost: 'till unga vuxna som möter cancer',
     formSum: 'insamlat till unga vuxna som möter cancer',
     more: 'Läs mer',               /* beskrivningen kortas, se --uc-fund-lines i CSS */
     less: 'Visa mindre'
