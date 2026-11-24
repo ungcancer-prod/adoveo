@@ -872,6 +872,30 @@
     }
   }
 
+  /* Givarens tacksida: bakgrundsbilden som läggs in i admin hamnar bara i
+     Adoveos mobilregel (@media max-width 812px). Samma bild och inställningar
+     läggs då på sidan även på bred skärm. Body får ingen bild annars. */
+  function endBackground() {
+    var body = document.body;
+    if (!body.classList.contains('swish-landing') || getComputedStyle(body).backgroundImage !== 'none') return;
+    var found = null;
+    var scan = function (rules) {
+      Array.prototype.forEach.call(rules || [], function (r) {
+        if (found) return;
+        if (r.cssRules && !r.selectorText) scan(r.cssRules);
+        else if (r.selectorText && /body\.swish-landing/.test(r.selectorText) && /url\(/.test(r.style.backgroundImage)) found = r.style;
+      });
+    };
+    Array.prototype.forEach.call(document.styleSheets, function (sh) {
+      try { scan(sh.cssRules); } catch (e) { /* stilmallar från andra domäner går inte att läsa */ }
+    });
+    if (!found) return;
+    ['backgroundImage', 'backgroundRepeat', 'backgroundPosition', 'backgroundSize', 'backgroundAttachment'].forEach(function (k) {
+      if (found[k]) body.style[k] = found[k];
+    });
+    if (!found.backgroundSize) body.style.backgroundSize = 'cover';
+  }
+
   /* Välj bild -> Byt bild när en bild är vald (texten före ikonen) */
   var UPLOAD_TEXT = { choose: 'Välj bild', change: 'Byt bild' };
   function uploadLabel(chosen) {
@@ -1335,7 +1359,7 @@
 
     /* Varje del körs för sig: kraschar en, fungerar resten ändå
        (t.ex. att headern göms vid scroll) */
-    [buildFooter, buildHero, conceptCards, formatPrices, buildTotal, makeAnchors, fundraiserCards, conceptSteps, inlineQr, createLayout, uploadWatch, goalDefault, fundraiserPage, greetingWall].forEach(function (fn) {
+    [buildFooter, buildHero, conceptCards, formatPrices, buildTotal, makeAnchors, fundraiserCards, conceptSteps, inlineQr, createLayout, uploadWatch, endBackground, goalDefault, fundraiserPage, greetingWall].forEach(function (fn) {
       try { fn(); } catch (e) { if (window.console) console.warn('[uc-p2p] ' + fn.name, e); }
     });
 

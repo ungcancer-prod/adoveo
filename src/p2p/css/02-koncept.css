@@ -31,41 +31,37 @@
     border: var(--uc-concept-frame);
     padding: var(--sp-7) var(--sp-4);
 }
-/* Givarens tacksida (End Page, /swMobileDone/..., body.swish-landing):
-   samma fulla bredd och luft som tacksidan efter skapad. Bredden kommer
-   annars från admins Wrapper Width. Text och logotyper hålls i läsbar
-   bredd i mitten. */
-body.swish-landing #wrap-default,
-body.swish-landing #phase-swish-result > .wrapper {
+/* Tacksidorna: efter skapad insamling (#phase-after-coupon) och givarens
+   tacksida (End Page, /swMobileDone/..., body.swish-landing). Båda är ett
+   kort, högst 390px brett, i mitten av sidan på alla skärmar. Bredden
+   kommer annars från admins Wrapper Width, som skiljer mellan kampanjerna
+   (295: 390px, 297: 100%). Givarens tacksida kan ha en bakgrundsbild från
+   admin (endBackground i scriptet gör att den syns även på desktop). */
+html:has(#phase-after-coupon:not([style*="none"])) #wrap-default,
+body.swish-landing #wrap-default {
     width: 100%;
     max-width: none;
+}
+#phase-after-coupon > .wrapper,
+body.swish-landing #phase-swish-result > .wrapper {
+    width: 100%;
+    max-width: 390px;
+    margin-inline: auto;
     box-sizing: border-box;
 }
 body.swish-landing #phase-swish-result > .wrapper {
     padding: var(--sp-7) var(--sp-4);
 }
-body.swish-landing #phase-swish-result .swish-done {
-    max-width: 640px;
-    margin-inline: auto;
-}
-body.swish-landing #phase-swish-result .swish-sub-heading {
-    max-width: 480px;
-    margin-inline: auto;
+@media (min-width: 800px) {
+    body.swish-landing #phase-swish-result > .wrapper {
+        margin-block: var(--sp-7);     /* bakgrundsbilden syns runt kortet */
+    }
 }
 body.swish-landing #phase-swish-result .swish-sub-heading img {
     display: block;
     max-width: 100%;
     height: auto;
     margin-inline: auto;
-}
-/* Tacksidan (efter skapad) är lika bred i alla koncept. Bredden kommer
-   annars från admins Wrapper Width, som skiljer mellan kampanjerna
-   (295: 390px, 297: 100%). */
-html:has(#phase-after-coupon:not([style*="none"])) #wrap-default,
-#phase-after-coupon > .wrapper {
-    width: 100%;
-    max-width: none;
-    box-sizing: border-box;
 }
 :is(#phase-before-coupon, #phase-after-coupon) :is(.cc-title, .cc-txt) {
     color: var(--uc-concept-ink);
