@@ -76,7 +76,7 @@
     messagePepp: 'Din pepp',       /* hälsningsfältets etikett på Pepp */
     of: 'av',                      /* "650 kr av 1 000 kr" */
     goal: 'av målet',              /* Utmaning: "av målet 1 000 kr" */
-    first: 'Bli först att ge',     /* när inget är insamlat än */
+    goalOnly: 'Mål:',              /* 0 kr: bara målet visas, ingen mätare */
     collected: 'insamlat',
     impactPre: 'Tillsammans har vi samlat in',
     impactPost: 'till unga vuxna som möter cancer och lever vidare',
@@ -996,9 +996,18 @@
     return goal;
   }
 
-  /* Insamlat, olika per koncept (FUND_SHOW). Utan mål: bara summan. */
+  /* Insamlat, olika per koncept (FUND_SHOW). Utan mål: bara summan.
+     0 kr: ingen summa och ingen tom mätare. Finns ett mål (Utmaning,
+     Födelsedag) står bara "Mål: X kr"; annars visas ingenting. */
   function fundShown(box, show, sum, goal) {
     if (sum == null) return;
+    if (!sum) {
+      if (!goal || show === 'impact' || show === 'form') return;
+      box.className = 'uc-fund__goal';
+      box.textContent = FUND_TEXT.goalOnly + ' ' + kr(goal);
+      box.hidden = false;
+      return;
+    }
     var pct = goal ? Math.round(sum / goal * 100) : 0;
     var bar = function () {
       var b = el('div', 'uc-fund__bar');
@@ -1020,14 +1029,10 @@
     } else {
       box.className = 'uc-fund__meter' + (show === 'small' ? ' uc-fund__meter--small' : '');
       var row = el('div', 'uc-fund__meter-row');
-      if (!sum) {
-        row.appendChild(el('span', 'uc-fund__meter-sum', FUND_TEXT.first));
-      } else {
-        row.appendChild(el('span', 'uc-fund__meter-sum', kr(sum)));
-        if (goal && show === 'small') row.appendChild(el('span', null, FUND_TEXT.of + ' ' + kr(goal)));
-        if (goal && show === 'meter') row.appendChild(el('span', 'uc-fund__meter-pct', pct + ' %'));
-        if (!goal) row.appendChild(el('span', null, FUND_TEXT.collected));
-      }
+      row.appendChild(el('span', 'uc-fund__meter-sum', kr(sum)));
+      if (goal && show === 'small') row.appendChild(el('span', null, FUND_TEXT.of + ' ' + kr(goal)));
+      if (goal && show === 'meter') row.appendChild(el('span', 'uc-fund__meter-pct', pct + ' %'));
+      if (!goal) row.appendChild(el('span', null, FUND_TEXT.collected));
       box.appendChild(row);
       if (goal) {
         box.appendChild(bar());

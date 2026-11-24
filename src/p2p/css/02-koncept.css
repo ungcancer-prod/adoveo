@@ -658,7 +658,8 @@ html.uc-fund-page #wrap-default {
    .uc-fund__meter         Utmaning: stor summa, procent och tjock mätare
    .uc-fund__meter--small  Födelsedag: liten summa och tunn mätare
    .uc-fund__impact        Till minne: summan till unga vuxna, ingen mätare
-   .uc-fund__formsum       Pepp: en rad ovanför formuläret */
+   .uc-fund__formsum       Pepp: en rad ovanför formuläret
+   .uc-fund__goal          0 kr med mål: bara "Mål: X kr" */
 .uc-fund__meter {
     max-width: 560px;
     margin-top: var(--sp-6);
@@ -705,6 +706,12 @@ html.uc-fund-page #wrap-default {
     height: 8px;
     margin-bottom: 0;
     border-width: 1.5px;
+}
+.uc-fund__goal {
+    margin-top: var(--sp-5);
+    font-family: var(--font-body);
+    font-size: var(--fs-h4);           /* 20px */
+    color: var(--uc-concept-ink);
 }
 .uc-fund__impact {
     margin-top: var(--sp-6);
