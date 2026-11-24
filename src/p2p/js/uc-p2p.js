@@ -627,15 +627,20 @@
     img.alt = '';                               /* dekor: rubriken bär budskapet */
     img.width = 600; img.height = 597;
     art.appendChild(img);
+    /* Allt som står i admin-fältet (rubriken och det som följer, oavsett
+       taggar: p, blockquote, div ...) samlas i textspalten, i sin ordning.
+       Admins avdelare (.divider) lämnas utanför. */
     var text = el('div', 'uc-hero__text');
-    var sub = h1.nextElementSibling && h1.nextElementSibling.matches('p') ? h1.nextElementSibling : null;
-    text.appendChild(h1);
-    if (sub) text.appendChild(sub);
+    var parts = Array.prototype.filter.call(sec.children, function (c) {
+      return !c.classList.contains('divider') && !/^(SCRIPT|STYLE|INPUT)$/.test(c.tagName);
+    });
+    parts.forEach(function (c) { text.appendChild(c); });
     var cta = el('a', 'cc-button uc-hero__cta', HERO_CTA.text);
     cta.href = HERO_CTA.href;
     text.appendChild(cta);
     sec.insertBefore(text, sec.firstChild);
     sec.insertBefore(art, text);
+    fitTitle(h1);
   }
 
   /* ---------- Belopp: samma format överallt ---------- */

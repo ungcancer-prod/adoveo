@@ -34,9 +34,12 @@
     height: auto;
 }
 
-/* 14.3 Texten: rubriken i röd, ingressen svart, knappen under */
+/* 14.3 Texten: rubriken, allt annat från admin-fältet och knappen under,
+   i en spalt. Spalten krymper inte under rubrikens ord (fitTitle krymper
+   rubriken i stället om ett ord inte får plats). */
 .uc-hero__text {
     flex: 0 1 440px;
+    min-width: min(440px, 100%);
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -48,7 +51,35 @@
     line-height: 1;
     text-align: left;
     text-wrap: balance;
+    overflow-wrap: normal;             /* hela ord, aldrig "INSAMLI / NG" */
+    word-break: normal;
+    hyphens: manual;
     color: var(--uc-black);
+}
+/* Det som står efter rubriken i admin, vilken tagg det än är */
+.uc-hero__text > :not(#page-title):not(.uc-hero__cta) {
+    max-width: 24ch;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: var(--fs-h4);           /* 20px */
+    line-height: 1.3;
+    text-align: left;
+    text-wrap: balance;
+    color: var(--uc-black);
+}
+/* Citat = handstil, som Ung Cancers slogan */
+.uc-hero__text > blockquote {
+    max-width: 22ch;
+    font-family: var(--font-hand);
+    font-size: 2.8rem;                 /* 28px */
+    line-height: 1.15;
+    text-transform: uppercase;
+    quotes: none;
+}
+.uc-hero__text > blockquote::before,
+.uc-hero__text > blockquote::after {
+    content: none;
 }
 .uc-hero #page-title + .cc-txt {
     max-width: 24ch;
@@ -87,7 +118,7 @@
         align-items: center;
     }
     .uc-hero #page-title,
-    .uc-hero #page-title + .cc-txt {
+    .uc-hero__text > * {
         text-align: center;
     }
     .uc-hero #page-title + .cc-txt {
