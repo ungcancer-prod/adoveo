@@ -199,9 +199,15 @@ body.swish-landing #phase-swish-result .swish-sub-heading img {
 /* Dubbel-id: plattformens egen #registration-file-upload-button-regel
    ligger EFTER Custom CSS i källan och vinner annars på ordning */
 #phase-before-coupon #registration-file-upload-button {
+    display: flex;                     /* plattformen ger block med padding bara upptill: texten hamnade för lågt */
+    align-items: center;
+    gap: var(--sp-2);
     width: 100%;
     max-width: 100%;
     margin: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    line-height: 1;
     justify-content: center;
     border: var(--uc-border);
     font-family: var(--font-head);
