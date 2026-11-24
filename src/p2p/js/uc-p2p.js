@@ -685,7 +685,12 @@
     var sum = el('p', 'uc-total__sum', kr(total));
     box.appendChild(sum);
     box.appendChild(el('p', 'uc-total__hand', TOTAL_TEXT.after));
-    hero.parentNode.insertBefore(box, hero.nextSibling);
+    /* Mellan konceptkorten och Pågående insamlingar; finns inte listan,
+       direkt under heron som förut */
+    var list = document.querySelector('.p2p-main .fundraisersWrapper');
+    var sec = list ? list.closest('.cc-section') : null;
+    if (sec && sec.parentNode === hero.parentNode) hero.parentNode.insertBefore(box, sec);
+    else hero.parentNode.insertBefore(box, hero.nextSibling);
   }
 
   /* ---------- Steg 1–2–3 på konceptens startsida ---------- */
@@ -835,13 +840,14 @@
     };
     var file = document.getElementById('registration_file_upload');
     if (file) file.addEventListener('change', function () {
+      uploadLabel(true);
       var f = file.files && file.files[0];
       if (f && /^image\//.test(f.type)) { chosen = URL.createObjectURL(f); applyImg(); }
     });
     var thumb = document.querySelector('#registration_file_upload_div .image-preview');
     if (thumb) new MutationObserver(function () {
       var src = thumb.getAttribute('src') || '';
-      if (/^(https?:|data:image|blob:)/.test(src) && src !== location.href) { chosen = src; applyImg(); }
+      if (/^(https?:|data:image|blob:)/.test(src) && src !== location.href) { chosen = src; applyImg(); uploadLabel(true); }
     }).observe(thumb, { attributes: true, attributeFilter: ['src'] });
 
     /* Ingen bild än: plattformen ger bilden en tom eller trasig adress,
@@ -859,6 +865,26 @@
         .observe(title, { childList: true, subtree: true, attributes: true, attributeFilter: ['src'] });
       noImg();
     }
+  }
+
+  /* Välj bild -> Byt bild när en bild är vald (texten före ikonen) */
+  var UPLOAD_TEXT = { choose: 'Välj bild', change: 'Byt bild' };
+  function uploadLabel(chosen) {
+    var b = document.getElementById('registration-file-upload-button');
+    if (!b) return;
+    for (var n = b.firstChild; n; n = n.nextSibling) {
+      if (n.nodeType === 3 && n.nodeValue.trim()) {
+        n.nodeValue = (chosen ? UPLOAD_TEXT.change : UPLOAD_TEXT.choose) + ' ';
+        return;
+      }
+    }
+  }
+  /* Bildvalet bevakas även utan förhandsvisning (createLayout körs bara med den) */
+  function uploadWatch() {
+    var file = document.getElementById('registration_file_upload');
+    if (!file || file.dataset.ucWatch) return;
+    file.dataset.ucWatch = '1';
+    file.addEventListener('change', function () { if (file.files && file.files.length) uploadLabel(true); });
   }
 
   /* Förhandsvisningen ska likna insamlingssidan: målet ("Mål: X kr", på
@@ -1304,7 +1330,7 @@
 
     /* Varje del körs för sig: kraschar en, fungerar resten ändå
        (t.ex. att headern göms vid scroll) */
-    [buildFooter, buildHero, conceptCards, formatPrices, buildTotal, makeAnchors, fundraiserCards, conceptSteps, inlineQr, createLayout, goalDefault, fundraiserPage, greetingWall].forEach(function (fn) {
+    [buildFooter, buildHero, conceptCards, formatPrices, buildTotal, makeAnchors, fundraiserCards, conceptSteps, inlineQr, createLayout, uploadWatch, goalDefault, fundraiserPage, greetingWall].forEach(function (fn) {
       try { fn(); } catch (e) { if (window.console) console.warn('[uc-p2p] ' + fn.name, e); }
     });
 

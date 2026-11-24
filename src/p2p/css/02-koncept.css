@@ -404,7 +404,7 @@ html.uc-noimg #coupon-page-title::after {
     text-transform: none;
 }
 #coupon-page-message {
-    margin: -0.55em 0 var(--sp-5);     /* rubriken in över bildens nederkant, som på insamlingssidan */
+    margin: 0 0 var(--sp-5);           /* bilden har sp-5 under sig: samma luft som på insamlingssidan i mobil */
     position: relative;
     font-family: var(--font-hand);
     font-weight: normal;
@@ -414,10 +414,10 @@ html.uc-noimg #coupon-page-title::after {
     text-transform: uppercase;
     text-align: left;
     overflow-wrap: break-word;
-    color: var(--uc-red);
+    color: var(--uc-concept-ink);
 }
 #giftcard-preview #coupon-page-message {
-    color: var(--uc-red);              /* vinner över 9.1:s textfärg på .cc-txt */
+    color: var(--uc-concept-ink);      /* svart, krämvit på mörk yta (Till minne); vinner över 9.1 */
 }
 #coupon-page-message br { display: none; }
 #coupon-page-message .uc-ghost {
@@ -659,7 +659,7 @@ html.uc-fund-page #wrap-default {
     text-wrap: balance;
     overflow-wrap: normal;             /* hela ord; fitTitle krymper vid behov */
     hyphens: manual;
-    color: var(--uc-red);
+    color: var(--uc-concept-ink);      /* svart, krämvit på mörk yta (Till minne) */
 }
 /* Beskrivningen: ca 60 tecken per rad, kortas med Läs mer */
 .uc-fund__desc {
@@ -889,7 +889,7 @@ html.uc-fund-page #wrap-default {
     }
     .uc-fund__head > .uc-fund__title {
         order: 1;
-        margin-top: -0.55em;           /* rubriken lägger sig över bildens nederkant */
+        margin-top: var(--sp-5);       /* 24px under bilden, samma som i förhandsvisningen */
         font-size: clamp(4.4rem, 13vw, 7.2rem);
     }
     .uc-fund--noimg .uc-fund__head > .uc-fund__title {

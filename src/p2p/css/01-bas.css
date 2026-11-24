@@ -283,6 +283,11 @@ hr.divider {
     line-height: 1;
 }
 @media (min-width: 800px) {
+    .uc-steps {                       /* alltid tre lika breda spalter på en rad, hur korta texterna än är */
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        width: 100%;
+    }
     .uc-step + .uc-step::before {     /* linjen från föregående ring */
         content: '';
         position: absolute;
