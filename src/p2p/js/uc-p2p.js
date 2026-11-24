@@ -90,7 +90,7 @@
      form = en rad ovanför formuläret. */
   var FUND_SHOW = { '297': 'meter', '295': 'small', '298': 'impact', '299': 'form' };
   /* Insamlingsmålet. Beskrivningsmallen i admin märker ut det så här:
-     [mål:{custom_field_1}]. Scriptet läser siffran och tar bort märket. */
+     [mål:{goal}] ({goal} = Adoveos fält Progress Goal). Scriptet läser siffran och tar bort märket. */
   var GOAL_MARK = /\[\s*mål\s*:\s*([\d\s.,]*)\]/i;
   /* Skapa-sidan: förvalt insamlingsmål och snabbval (fältet vars etikett
      innehåller "mål"). */

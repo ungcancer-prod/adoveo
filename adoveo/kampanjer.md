@@ -40,11 +40,14 @@ bort. (Ligger den kvar gör det inget — scriptet använder den då i stället.
 
 ### Insamlingsmålet på insamlingssidan
 
-Mätaren (Utmaning, Födelsedag) läser målet ur beskrivningen. I mallen för
-titelraden i admin ska målfältet stå inom ett märke, så här:
+Adoveos egen mätare på P2P Page renderas inte på insamlingssidorna (testat
+2026-11-24, även med nytt mål). Vår mätare (Utmaning, Födelsedag) läser
+därför målet ur beskrivningen. I mallen för
+titelraden (P2P Page → Description) ska shortcoden för Progress Goal stå
+inom ett märke, så här:
 
 ```
-[mål:{custom_field_1}]
+[mål:{goal}]
 ```
 
 Scriptet läser siffran och tar bort märket ur texten, så det syns inte på
