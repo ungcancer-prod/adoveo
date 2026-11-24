@@ -760,6 +760,33 @@ html.uc-fund-page #wrap-default {
     margin-top: var(--sp-4);
     text-align: left;
 }
+/* Väntläget efter Swisha (desktop): plattformen döljer formuläret och
+   visar #showText med Desktop app launch text från admin (.uc-swish-instruction).
+   Vänsterställt och i formulärets skala, under "Din gåva". */
+.uc-fund #showText {
+    margin: 0;
+    padding: 0;
+    text-align: left;
+}
+.uc-fund .uc-swish-instruction {
+    max-width: none;
+    margin: 0;
+}
+.uc-fund .uc-swish-instruction h2 {
+    margin: 0 0 var(--sp-4);
+    font-size: var(--fs-h4);           /* 20px */
+    line-height: 1.2;
+    text-align: left;
+    color: var(--uc-concept-ink);
+}
+.uc-fund .uc-instruction-text {
+    text-align: left;
+}
+.uc-fund .uc-app-screenshot {
+    width: 100%;
+    max-width: 240px;
+    margin: var(--sp-2) 0 0;
+}
 /* Formuläret vänsterställt: beloppsknappar, kryssruta och Swisha-knapp
    i samma kant som fälten (plattformen centrerar dem) */
 .uc-fund .show_swish_reward_form :is(.product_button_group, .checkbox-group, #confirm_button_group) {
