@@ -907,7 +907,26 @@
 
     fundDescription(head);
     fitTitle(head.querySelector('.uc-fund__title'));
+    fundCta(cta, wrap);
     fundSum(sumNum, sum);
+  }
+
+  /* Gåva & hälsning flyttar ner till formuläret. Syns formuläret redan
+     när sidan laddas (t.ex. desktop utan bild) behövs knappen inte.
+     På mobil döljs den alltid i CSS. */
+  function fundCta(cta, wrap) {
+    var form = wrap.querySelector('.show_swish_reward_form');
+    if (!form) return;
+    var check = function () {
+      var top = form.getBoundingClientRect().top + window.scrollY;
+      cta.classList.toggle('is-hidden', top < window.innerHeight - 80);
+    };
+    check();
+    window.addEventListener('resize', check);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(check);
+    var img = wrap.querySelector('#page-title-swish-form img');
+    if (img) img.addEventListener('load', check);
+    new MutationObserver(check).observe(wrap, { attributes: true, attributeFilter: ['class'] });
   }
 
   /* Rubriken bryter bara mellan ord. Är ett ord längre än raden
