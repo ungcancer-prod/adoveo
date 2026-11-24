@@ -416,6 +416,9 @@ html.uc-noimg #coupon-page-title::after {
     overflow-wrap: break-word;
     color: var(--uc-red);
 }
+#giftcard-preview #coupon-page-message {
+    color: var(--uc-red);              /* vinner över 9.1:s textfärg på .cc-txt */
+}
 #coupon-page-message br { display: none; }
 #coupon-page-message .uc-ghost {
     opacity: 0.5;                      /* fältets etikett tills man skrivit något */
