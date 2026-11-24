@@ -92,6 +92,7 @@
   /* Insamlingsmålet. Beskrivningsmallen i admin märker ut det så här:
      [mål:{goal}] ({goal} = Adoveos fält Progress Goal). Scriptet läser siffran och tar bort märket. */
   var GOAL_MARK = /\[\s*mål\s*:\s*([\d\s.,]*)\]/i;
+  var GOAL_ANY  = /\[\s*mål\s*:[^\]]*\]/gi;   /* även orenderat: [mål:{goal}] i förhandsvisningen */
   /* Skapa-sidan: förvalt insamlingsmål och snabbval (fältet vars etikett
      innehåller "mål"). */
   var GOAL_DEFAULT = 1000;
@@ -805,7 +806,7 @@
       for (var round = 0; round !== 5; round++) {
         var w = document.createTreeWalker(msg, NodeFilter.SHOW_TEXT), t = null, m = null;
         while (w.nextNode()) {
-          if (GOAL_MARK.test(w.currentNode.nodeValue)) w.currentNode.nodeValue = w.currentNode.nodeValue.replace(GOAL_MARK, '');
+          if (GOAL_ANY.test(w.currentNode.nodeValue)) w.currentNode.nodeValue = w.currentNode.nodeValue.replace(GOAL_ANY, '');
           m = w.currentNode.nodeValue.match(/\{(your_name|description)\}/);
           if (m) { t = w.currentNode; break; }
         }
@@ -818,6 +819,7 @@
     if (msg) {
       ghost();
       new MutationObserver(ghost).observe(msg, { childList: true, characterData: true, subtree: true });
+      previewExtras(msg);
     }
 
     /* Bilden. Plattformen lägger aldrig in den valda bilden i
@@ -859,18 +861,51 @@
     }
   }
 
+  /* Förhandsvisningen ska likna insamlingssidan: målet ("Mål: X kr", på
+     koncept med mätare, se FUND_SHOW) under beskrivningen och "Din gåva"
+     ovanför formuläret. */
+  function previewExtras(msg) {
+    var wrap = msg.parentNode;
+    var camp = (location.pathname.match(/\/start\/(\d+)/) || [])[1];
+    var show = FUND_SHOW[camp] || 'small';
+    var first = wrap.querySelector('.input-group');
+    if (first && !wrap.querySelector('.uc-preview-give')) {
+      var h2 = el('h2', 'cc-title uc-preview-give', show === 'form' ? FUND_TEXT.givePepp : FUND_TEXT.give);
+      wrap.insertBefore(h2, first);
+    }
+    if (show !== 'meter' && show !== 'small') return;
+    var field = goalField();
+    if (!field) return;
+    var line = el('p', 'uc-preview-goal');
+    msg.parentNode.insertBefore(line, msg.nextSibling);
+    var upd = function () {
+      var v = parseInt(String(field.value).replace(/\D/g, ''), 10);
+      line.textContent = v ? FUND_TEXT.goalOnly + ' ' + kr(v) : '';
+      line.hidden = !v;
+    };
+    field.addEventListener('input', upd);
+    field.addEventListener('change', upd);
+    upd();
+  }
+  /* Målfältet på skapa-sidan: det vars etikett innehåller "mål" */
+  function goalField() {
+    var phase = document.getElementById('phase-before-coupon');
+    var field = null;
+    if (phase) phase.querySelectorAll('input[id^="custom_field_"], input[name*="goal" i]').forEach(function (i) {
+      var g = i.closest('.input-group');
+      var l = g && g.querySelector('label');
+      if (!field && /mål/i.test((l && l.textContent) || i.placeholder || '')) field = i;
+    });
+    return field;
+  }
+
   /* Skapa-sidan: insamlingsmålet förifyllt (GOAL_DEFAULT) med snabbval.
      Fältet hittas på etiketten ("mål"), så det spelar ingen roll vilket
      custom field det är. Finns inget sådant fält görs ingenting. */
   function goalDefault() {
     var phase = document.getElementById('phase-before-coupon');
     if (!phase || phase.querySelector('.uc-goal')) return;
-    var field = null;
-    phase.querySelectorAll('input[id^="custom_field_"]').forEach(function (i) {
-      var g = i.closest('.input-group');
-      var l = g && g.querySelector('label');
-      if (!field && /mål/i.test((l && l.textContent) || i.placeholder || '')) field = i;
-    });
+    var field = goalField();
     if (!field) return;
     var set = function (v) {
       field.value = v;

@@ -9,6 +9,7 @@
    ========================================= */
 :root {
     --uc-header-bg:     var(--uc-white);  /* samma vita som ungcancer.se */
+    --uc-header-h:      104px;            /* headerns höjd (se 12.1): sticky-element stannar under den */
     --uc-drawer-w:      480px;
     --uc-drawer-rule:   rgba(var(--uc-black-rgb), 0.2);  /* strecken i menyn: svag svart ton */
     --uc-search-rule:   rgba(var(--uc-black-rgb), 0.1);

@@ -31,6 +31,15 @@
     border: var(--uc-concept-frame);
     padding: var(--sp-7) var(--sp-4);
 }
+/* Tacksidan (efter skapad) är lika bred i alla koncept. Bredden kommer
+   annars från admins Wrapper Width, som skiljer mellan kampanjerna
+   (295: 390px, 297: 100%). */
+html:has(#phase-after-coupon:not([style*="none"])) #wrap-default,
+#phase-after-coupon > .wrapper {
+    width: 100%;
+    max-width: none;
+    box-sizing: border-box;
+}
 :is(#phase-before-coupon, #phase-after-coupon) :is(.cc-title, .cc-txt) {
     color: var(--uc-concept-ink);
 }
@@ -293,7 +302,7 @@ html.uc-create-split #phase-before-coupon > .wrapper :is(.input-group, .confirm_
 html.uc-create-split .uc-create__phone {
     flex: none;
     position: sticky;
-    top: var(--sp-5);
+    top: calc(var(--uc-header-h) + var(--sp-5));   /* under headern även när den är utfälld */
     margin-top: var(--sp-7);
     width: calc(375px * var(--uc-phone-scale));
     height: calc(667px * var(--uc-phone-scale));
@@ -347,9 +356,10 @@ html.uc-create-split #hide-preview {
     display: none !important;
 }
 
-/* 9.7 Innehållet i förhandsvisningen: bilden utfallande överst,
-   titelraden som rubrik, beskrivningen som brödtext.
-   Gäller både telefonen och plattformens popup. */
+/* 9.7 Innehållet i förhandsvisningen: som insamlingssidan på mobil
+   (sektion 10.5). Bilden kvadratisk och utfallande, rubriken i handstil
+   in över bildens nederkant, beskrivningen, målet, "Din gåva" och
+   formuläret, allt vänsterställt. Gäller både telefonen och popupen. */
 #giftcard-preview > .wrapper {
     min-height: 100%;
     margin: 0;
@@ -368,8 +378,9 @@ html.uc-create-split #hide-preview {
     width: 100% !important;
     max-width: none !important;
     height: auto;
-    aspect-ratio: auto !important;
-    object-fit: fill !important;
+    aspect-ratio: 1 / 1 !important;
+    object-fit: cover !important;
+    object-position: 50% 30%;
     border-radius: 0 !important;
     border: 0;
     margin: 0;
@@ -384,7 +395,7 @@ html.uc-noimg #coupon-page-title::after {
     display: flex;
     align-items: center;
     justify-content: center;
-    aspect-ratio: 4 / 3;
+    aspect-ratio: 1 / 1;
     background-color: rgba(var(--uc-black-rgb), 0.08);
     color: var(--uc-concept-ink);
     opacity: 0.35;
@@ -393,13 +404,17 @@ html.uc-noimg #coupon-page-title::after {
     text-transform: none;
 }
 #coupon-page-message {
-    margin: 0 auto var(--sp-5);
-    font-family: var(--font-head);
-    font-size: var(--fs-h3);           /* 24px i en 375px-skärm */
-    line-height: var(--lh-head);
-    letter-spacing: var(--track-tight);
+    margin: -0.55em 0 var(--sp-5);     /* rubriken in över bildens nederkant, som på insamlingssidan */
+    position: relative;
+    font-family: var(--font-hand);
+    font-weight: normal;
+    font-size: 4.8rem;                 /* 48px = insamlingssidans rubrik i en 375px-skärm */
+    line-height: 1.02;
+    letter-spacing: normal;
     text-transform: uppercase;
-    color: var(--uc-concept-ink);
+    text-align: left;
+    overflow-wrap: break-word;
+    color: var(--uc-red);
 }
 #coupon-page-message br { display: none; }
 #coupon-page-message .uc-ghost {
@@ -407,13 +422,40 @@ html.uc-noimg #coupon-page-title::after {
 }
 #coupon-page-message > span:not(.uc-ghost) {
     display: block;
-    margin-top: var(--sp-3);
+    margin-top: var(--sp-6);
+    color: var(--uc-concept-ink);
     font-family: var(--font-body);
     font-size: var(--fs-body) !important;   /* inline 16px */
     line-height: 150%;
     letter-spacing: normal;
     text-transform: none;
     white-space: pre-line;
+}
+/* Målet och "Din gåva" i förhandsvisningen (previewExtras i scriptet) */
+.uc-preview-goal {
+    margin: calc(-1 * var(--sp-2)) 0 var(--sp-5);
+    font-family: var(--font-body);
+    font-size: var(--fs-body);
+    text-align: left;
+    color: var(--uc-concept-ink);
+}
+#giftcard-preview .uc-preview-give {
+    margin: var(--sp-7) 0 var(--sp-4);
+    font-size: var(--fs-h2);           /* 32px, som på insamlingssidan i mobil */
+    text-align: left;
+    color: var(--uc-concept-ink);
+}
+#giftcard-preview :is(.product_button_group, .checkbox-group, .confirm_button_group, #confirm_button_group) {
+    justify-content: flex-start;
+}
+#giftcard-preview .product_button_group {
+    gap: var(--sp-2);
+    margin-left: 0;
+    margin-right: 0;
+}
+#giftcard-preview .product_button_group .cc-button {
+    margin-left: 0;
+    margin-right: 0;
 }
 /* Insamlingsmålet: förifyllt med förslag och snabbval (goalDefault i scriptet) */
 .uc-goal {
@@ -559,7 +601,7 @@ html.uc-fund-page #wrap-default {
     grid-column: 2;
     grid-row: 2;
     position: sticky;                  /* formuläret följer med ner */
-    top: var(--sp-5);
+    top: calc(var(--uc-header-h) + var(--sp-5));   /* under headern även när den är utfälld */
 }
 .uc-fund--noimg > :is(.uc-fund__head, .uc-fund__side) {
     grid-row: 1;
