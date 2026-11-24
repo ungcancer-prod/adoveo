@@ -42,7 +42,7 @@
      svarta i CSS (sektion 15). Ikonerna ligger i src/icons/. */
   var FOOTER = {
     columns: [
-      { title: 'Ge en gåva',   lines: ['Swish: 9005745', 'Bg: 900-5745'] },
+      { title: 'Om Ung Cancer', lines: [{ text: 'ungcancer.se', href: 'https://ungcancer.se/' }] },
       { title: 'Postadress',   lines: ['Ung Cancer', 'C/o The Works (Hiss A, våning 7)', 'Medborgarplatsen 25', '118 72 Stockholm'] },
       { title: 'Besöksadress', lines: ['Medborgarplatsen 25', '118 72 Stockholm'] },
       { title: 'Kontakt',      lines: [{ text: 'info@ungcancer.se', href: 'mailto:info@ungcancer.se' }] }
