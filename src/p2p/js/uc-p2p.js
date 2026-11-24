@@ -876,10 +876,10 @@
 
   /* Givarens tacksida: bakgrundsbilden som läggs in i admin hamnar bara i
      Adoveos mobilregel (@media max-width 812px). Samma bild och inställningar
-     läggs då på sidan även på bred skärm. Body får ingen bild annars. */
+     läggs då på sidan på alla skärmar, före vår standardbild (CSS 9.0). */
   function endBackground() {
     var body = document.body;
-    if (!body.classList.contains('swish-landing') || getComputedStyle(body).backgroundImage !== 'none') return;
+    if (!body.classList.contains('swish-landing')) return;
     var found = null;
     var scan = function (rules) {
       Array.prototype.forEach.call(rules || [], function (r) {

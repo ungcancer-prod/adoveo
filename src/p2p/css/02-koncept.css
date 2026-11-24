@@ -79,6 +79,16 @@ body.swish-landing #phase-swish-result > .wrapper {
 body.swish-landing #phase-swish-result > .wrapper {
     padding: var(--sp-7) var(--sp-4);
 }
+/* Givarens tacksida: standardbild bakom kortet i alla koncept
+   (src/assets/tack-bakgrund.jpg, foto Tanja Lundin). En bild som läggs in
+   i admin går före (endBackground i scriptet). */
+body.swish-landing {
+    background-image: url('tack-bakgrund.jpg');
+    background-repeat: no-repeat;
+    background-position: top center;
+    background-size: cover;
+    background-attachment: fixed;
+}
 @media (min-width: 800px) {
     body.swish-landing #phase-swish-result > .wrapper {
         margin-block: var(--sp-7);     /* bakgrundsbilden syns runt kortet */
