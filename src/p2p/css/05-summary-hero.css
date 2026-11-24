@@ -28,10 +28,16 @@
     flex: 0 1 480px;
     min-width: 0;
 }
+/* hjarta.svg har 30 enheter luft runt hjärtat (611,7 breda), så att
+   prickarna inte skärs av när de poppar fram, andas och driver. Bilden
+   görs lika mycket större och dras ut med negativ marginal: hjärtat
+   hamnar där det stod förut. 30 / 611,7 = 4,904 %. */
 .uc-hero__art img {
     display: block;
-    width: 100%;
+    width: calc(100% + 2 * 4.904%);
+    max-width: none;
     height: auto;
+    margin: -4.904%;
 }
 
 /* 14.3 Texten: rubriken, allt annat från admin-fältet och knappen under,

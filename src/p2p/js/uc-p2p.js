@@ -705,7 +705,7 @@
     var img = el('img');
     img.src = ASSETS + 'hjarta.svg';
     img.alt = '';                               /* dekor: rubriken bär budskapet */
-    img.width = 600; img.height = 597;
+    img.width = 672; img.height = 657;            /* hjarta.svg med luft runt om (se CSS 14.2) */
     art.appendChild(img);
     /* Allt som står i admin-fältet (rubriken och det som följer, oavsett
        taggar: p, blockquote, div ...) samlas i textspalten, i sin ordning.
