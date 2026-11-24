@@ -118,7 +118,7 @@
         align-items: center;
     }
     .uc-hero #page-title,
-    .uc-hero__text > * {
+    .uc-hero__text > :not(#page-title):not(.uc-hero__cta) {   /* samma vikt som regeln i 14.3 */
         text-align: center;
     }
     .uc-hero #page-title + .cc-txt {
