@@ -616,11 +616,24 @@
   function fundraiserCards() {
     var boxes = document.querySelectorAll('#fundraisersDisplay, #searchDisplay');
     if (!boxes.length) return;
-    var map = null;
+    var map = null, fresh = false;
     var run = function () {
+      var unknown = false;
       boxes.forEach(function (b) {
-        b.querySelectorAll('.cc-card').forEach(function (c) { upgradeCard(c, map); });
+        b.querySelectorAll('.cc-card').forEach(function (c) {
+          upgradeCard(c, map);
+          var a = c.querySelector('.uc-fcard__link');
+          if (map && a && !map[p2pCode(a.getAttribute('href'))]) unknown = true;
+        });
       });
+      /* En insamling som startats efter att konceptlistan sparades (10 min)
+         saknas i den: hämta om listan en gång, så får kortet sin etikett */
+      if (unknown && !fresh) {
+        fresh = true;
+        try { sessionStorage.removeItem(CONCEPT_CACHE); } catch (e) { /* ok */ }
+        conceptMap = null;
+        loadConcepts().then(function (m) { map = m; run(); });
+      }
     };
     run();
     loadConcepts().then(function (m) { map = m; run(); });
