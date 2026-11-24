@@ -6,7 +6,6 @@
    ========================================= */
 .uc-footer {
     padding: 112px 48px 32px;
-    border-top: 1px solid var(--uc-drawer-rule);   /* vit footer på vit sida: tunt streck som i menyn */
     background-color: var(--uc-white);
     color: var(--uc-black);
     font-family: var(--font-body);
