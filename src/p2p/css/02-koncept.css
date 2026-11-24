@@ -31,6 +31,33 @@
     border: var(--uc-concept-frame);
     padding: var(--sp-7) var(--sp-4);
 }
+/* 9.0 Skev kant på konceptets ytor: insamlingssidan, tacksidan efter
+   skapad och givarens tacksida. Färgen ritas av ::before med --uc-clip,
+   inte med clip-path på själva ytan: den skulle klippa plattformens
+   fixed-rutor (felmeddelanden, Swish-popup) och formuläret som följer med.
+   Gatas på html.uc-skew, som scriptet sätter först när konceptfärgen är
+   avläst (conceptColors läser wrapperns bakgrund). Samma teknik som
+   skapa-sidan (9.6). */
+html.uc-skew .p2p-transaction-landing #phase-swish-result > .wrapper.uc-fund,
+html.uc-skew #phase-after-coupon > .wrapper,
+html.uc-skew body.swish-landing #phase-swish-result > .wrapper {
+    position: relative;
+    isolation: isolate;
+    background-color: transparent;
+}
+html.uc-skew .p2p-transaction-landing #phase-swish-result > .wrapper.uc-fund::before,
+html.uc-skew #phase-after-coupon > .wrapper::before,
+html.uc-skew body.swish-landing #phase-swish-result > .wrapper::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    -webkit-clip-path: var(--uc-clip);
+    clip-path: var(--uc-clip);
+    background-color: var(--uc-concept-bg);
+    pointer-events: none;
+}
+
 /* Tacksidorna: efter skapad insamling (#phase-after-coupon) och givarens
    tacksida (End Page, /swMobileDone/..., body.swish-landing). Båda är ett
    kort, högst 390px brett, i mitten av sidan på alla skärmar. Bredden
@@ -404,6 +431,8 @@ html.uc-create-split #hide-preview {
     aspect-ratio: 1 / 1 !important;
     object-fit: cover !important;
     object-position: 50% 30%;
+    -webkit-clip-path: var(--uc-clip);    /* skev kant, som på insamlingssidan */
+    clip-path: var(--uc-clip);
     border-radius: 0 !important;
     border: 0;
     margin: 0;
@@ -659,6 +688,8 @@ html.uc-fund-page #wrap-default {
     margin: 0;
     border: 0;
     border-radius: 0;
+    -webkit-clip-path: var(--uc-clip);    /* skev kant, som alla bilder */
+    clip-path: var(--uc-clip);
 }
 .uc-fund--wide #page-title-swish-form img {
     height: 72vh;
