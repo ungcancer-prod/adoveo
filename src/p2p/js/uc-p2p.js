@@ -261,6 +261,7 @@
     root.style.setProperty('--uc-concept-bg', 'rgb(' + m[0] + ',' + m[1] + ',' + m[2] + ')');
     root.style.setProperty('--uc-concept-ink', dark ? 'var(--uc-cream)' : 'var(--uc-black)');
     root.style.setProperty('--uc-concept-logo-bg', dark ? 'var(--uc-cream)' : 'transparent');
+    root.classList.toggle('uc-dark', dark);     /* mörk yta (Till minne): knapparna i kontur, CSS 9.0b */
     root.classList.add('uc-skew');               /* färgen är läst: ytan kan ritas med skev kant (CSS 9.0) */
   }
 

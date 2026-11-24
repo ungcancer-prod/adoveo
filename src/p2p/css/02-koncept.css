@@ -252,6 +252,25 @@ body.swish-landing #phase-swish-result .swish-sub-heading img {
     border-color: var(--uc-black);     /* plattformens ram är #000 */
     box-shadow: 0 0 20px 4px rgba(var(--uc-black-rgb), 0.75);
 }
+/* 9.0b Knappar på mörk yta (Till minne): som knappen på konceptkortet
+   på Summary. Kontur och text i ytans textfärg (krämvit) på genomskinlig
+   botten; vid hover fylls knappen krämvit med ytans färg som text.
+   Temats knappar är annars vita (#fff) och blir svarta vid hover, alltså
+   osynliga mot den svarta ytan. html.uc-dark sätts av conceptColors.
+   Dela-knappen (9.5) är primär och fylld; gåvo-togglen rörs inte. */
+html.uc-dark :is(#phase-before-coupon, #phase-after-coupon, #phase-swish-result) :is(.cc-button:not(.cc-toggle, .p2p-share-campaign-button), #registration-file-upload-button) {
+    background-color: transparent;
+    border-color: var(--uc-concept-ink);
+    color: var(--uc-concept-ink);
+}
+html.uc-dark :is(#phase-before-coupon, #phase-after-coupon, #phase-swish-result) :is(.cc-button:not(.cc-toggle, .p2p-share-campaign-button), #registration-file-upload-button):is(:hover, :focus-visible) {
+    background-color: var(--uc-concept-ink);
+    border-color: var(--uc-concept-ink);
+    color: var(--uc-concept-bg);
+}
+html.uc-dark :is(#phase-before-coupon, #phase-after-coupon, #phase-swish-result) .cc-button:not(.cc-toggle) .cc-link {
+    color: inherit;
+}
 /* 9.5 Efter skapad: Dela = primär (fylld), Se = sekundär (kontur) */
 #after-coupon-share-text {
     display: flex;
