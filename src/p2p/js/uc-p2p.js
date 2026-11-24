@@ -71,7 +71,7 @@
   /* Texterna som scriptet lägger till. Rubrik, beskrivning och bild
      kommer från insamlaren; formulärets etiketter från admin. */
   var FUND_TEXT = {
-    give: 'Din gåva',              /* rubriken ovanför formuläret */
+    give: 'Din gåva och hälsning', /* rubriken ovanför formuläret */
     givePepp: 'Din pepp & gåva',   /* rubriken ovanför formuläret på Pepp */
     messagePepp: 'Din pepp',       /* hälsningsfältets etikett på Pepp */
     of: 'av',                      /* "650 kr av 1 000 kr" */

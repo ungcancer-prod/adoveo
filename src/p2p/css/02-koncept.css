@@ -496,7 +496,7 @@ html.uc-noimg #coupon-page-title::after {
 }
 #giftcard-preview .uc-preview-give {
     margin: var(--sp-7) 0 var(--sp-4);
-    font-size: var(--fs-h2);           /* 32px, som på insamlingssidan i mobil */
+    font-size: var(--fs-h3);           /* 24px, som på insamlingssidan i mobil */
     text-align: left;
     color: var(--uc-concept-ink);
 }
@@ -840,7 +840,8 @@ html.uc-fund-page #wrap-default {
 /* 10.4 Högerspalten: "Din gåva" + formuläret, vänsterställt */
 .uc-fund .uc-fund__give {
     margin: 0 0 var(--sp-5);
-    font-size: var(--fs-h1);           /* 44px */
+    font-size: var(--fs-h2);           /* 32px: "Din gåva och hälsning" på en rad i 320px */
+    white-space: nowrap;
     text-align: left;
     color: var(--uc-concept-ink);
 }
@@ -965,7 +966,8 @@ html.uc-fund-page #wrap-default {
     }
     .uc-fund .uc-fund__give {
         margin-top: var(--sp-7);
-        font-size: var(--fs-h2);       /* 32px */
+        font-size: var(--fs-h3);       /* 24px */
+        white-space: normal;
     }
     .uc-fund :is(.show_swish_reward_form, #showText, #errorText, #swish_form_underlay_text) {
         max-width: none;
