@@ -644,6 +644,53 @@
     });
   }
 
+  /* ---------- Pågående insamlingar på konceptets startsida ---------- */
+  /* Skapa-sidan (/start/295/ osv.) har ingen egen lista. Här byggs en med
+     samma kort och rutnät som på Summary, men bara konceptets insamlingar
+     (senast startad först) och utan sökruta. Tre i taget, som på Summary.
+     Inga insamlingar = ingen rubrik. */
+  var LIST_TEXT = { title: 'Pågående insamlingar', more: 'Se fler' };
+  var LIST_STEP = 3;
+  function conceptList() {
+    var m = location.pathname.match(/\/start\/(\d+)/);
+    var c = m ? byId(m[1]) : null;
+    if (!c || !document.getElementById('phase-before-coupon') || document.querySelector('.uc-fundlist')) return;
+    cardsByConcept(SUMMARY_ID, c.id, FOLDER).then(function (j) {
+      var doc = new DOMParser().parseFromString((j && j.html) || '', 'text/html');
+      var cards = Array.prototype.slice.call(doc.querySelectorAll('.cc-card'));
+      if (!cards.length) return;
+      var map = {};
+      cards.forEach(function (card) {
+        var a = card.querySelector('a[href]');
+        var k = a ? p2pCode(a.getAttribute('href')) : '';
+        if (k) map[k] = c;
+      });
+      var sec = el('section', 'uc-fundlist');
+      sec.id = 'pagaende-insamlingar';
+      sec.appendChild(el('h2', 'uc-fundlist__title', LIST_TEXT.title));
+      var grid = el('div', 'uc-fundlist__grid');
+      sec.appendChild(grid);
+      var more = el('button', 'cc-button cc-btn-third uc-fundlist__more', LIST_TEXT.more);
+      more.type = 'button';
+      sec.appendChild(more);
+      var shown = 0;
+      var next = function () {
+        cards.slice(shown, shown + LIST_STEP).forEach(function (card) {
+          var mine = document.importNode(card, true);
+          grid.appendChild(mine);
+          upgradeCard(mine, map);               /* efter insättning: texten räknas i rutan */
+        });
+        shown = Math.min(cards.length, shown + LIST_STEP);
+        more.hidden = shown === cards.length;
+      };
+      more.addEventListener('click', next);
+      var foot = document.querySelector('.uc-footer');
+      if (foot && foot.parentNode) foot.parentNode.insertBefore(sec, foot);
+      else document.body.appendChild(sec);
+      next();
+    }).catch(function () { /* ingen lista: sidan fungerar ändå */ });
+  }
+
   /* ---------- Summary-heron: hjärtat till vänster, rubriken till höger ---------- */
   /* Första sektionen på Summary (rubrik + ingress från admin) blir en hero
      på rosa yta. Hjärtat (src/assets/hjarta.svg) ritas upp bubbla för
@@ -1411,7 +1458,7 @@
 
     /* Varje del körs för sig: kraschar en, fungerar resten ändå
        (t.ex. att headern göms vid scroll) */
-    [buildFooter, buildHero, conceptCards, formatPrices, buildTotal, makeAnchors, fundraiserCards, conceptSteps, inlineQr, createLayout, uploadWatch, endBackground, goalDefault, fundraiserPage, greetingWall].forEach(function (fn) {
+    [buildFooter, conceptList, buildHero, conceptCards, formatPrices, buildTotal, makeAnchors, fundraiserCards, conceptSteps, inlineQr, createLayout, uploadWatch, endBackground, goalDefault, fundraiserPage, greetingWall].forEach(function (fn) {
       try { fn(); } catch (e) { if (window.console) console.warn('[uc-p2p] ' + fn.name, e); }
     });
 

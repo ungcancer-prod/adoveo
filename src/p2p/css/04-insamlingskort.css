@@ -11,7 +11,8 @@
 /* 13.1 Rutnätet: tre i rad (plattformen laddar tre åt gången), två på
    surfplatta, ett på mobil. Id-väljare: plattformens regler är (0,3,0). */
 #fundraisersDisplay,
-#searchDisplay {
+#searchDisplay,
+.uc-fundlist__grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: var(--sp-6) var(--sp-5);      /* 32px mellan rader, 24px mellan kort */
@@ -32,11 +33,35 @@
 }
 @media (max-width: 999px) {
     #fundraisersDisplay,
-    #searchDisplay { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    #searchDisplay,
+    .uc-fundlist__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 599px) {
     #fundraisersDisplay,
-    #searchDisplay { grid-template-columns: minmax(0, 1fr); }
+    #searchDisplay,
+    .uc-fundlist__grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* 13.1b Konceptets startsida: listan byggs av scriptet (conceptList),
+   under skapa-ytan och före footern. Rubrik och Se fler som på Summary,
+   men ingen sökruta. */
+.uc-fundlist {
+    padding: calc(var(--sp-7) * 2) var(--sp-4) 0;   /* 80px luft under skapa-ytan */
+    text-align: center;
+}
+.uc-fundlist .uc-fundlist__title {
+    margin: 0 0 var(--sp-6);
+    color: var(--uc-black);
+    text-align: center;
+}
+.uc-fundlist .uc-fundlist__grid {
+    text-align: left;
+}
+.uc-fundlist .uc-fundlist__more {
+    margin: var(--sp-5) auto 0;
+}
+.uc-fundlist .uc-fundlist__more[hidden] {
+    display: none;
 }
 
 /* 13.2 Kortet: 4:5, bild halva höjden, textrutan resten. Kortet självt
