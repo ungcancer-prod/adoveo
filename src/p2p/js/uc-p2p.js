@@ -88,7 +88,8 @@
      meter = summa, procent och tjock mätare; small = liten summa och
      tunn mätare; impact = summan till unga vuxna, ingen mätare;
      form = en rad ovanför formuläret. */
-  var FUND_SHOW = { '297': 'meter', '295': 'small', '298': 'impact', '299': 'form' };
+  var FUND_SHOW = { '297': 'meter', '295': 'small', '298': 'impact', '299': 'impact' };
+  var PEPP_ID = '299';             /* Pepp: "Din pepp & gåva" och hälsningsfältet "Din pepp" */
   /* Insamlingsmålet. Beskrivningsmallen i admin märker ut det så här:
      [mål:{goal}] ({goal} = Adoveos fält Progress Goal). Scriptet läser siffran och tar bort märket. */
   var GOAL_MARK = /\[\s*mål\s*:\s*([\d\s.,]*)\]/i;
@@ -927,7 +928,7 @@
     var show = FUND_SHOW[camp] || 'small';
     var first = wrap.querySelector('.input-group');
     if (first && !wrap.querySelector('.uc-preview-give')) {
-      var h2 = el('h2', 'cc-title uc-preview-give', show === 'form' ? FUND_TEXT.givePepp : FUND_TEXT.give);
+      var h2 = el('h2', 'cc-title uc-preview-give', camp === PEPP_ID ? FUND_TEXT.givePepp : FUND_TEXT.give);
       wrap.insertBefore(h2, first);
     }
     if (show !== 'meter' && show !== 'small') return;
@@ -1041,7 +1042,7 @@
     /* Högerspalten: Din gåva + formuläret. Plattformens element flyttas
        hit i sin ordning (Swish-instruktionen #showText under rubriken). */
     var side = el('div', 'uc-fund__side');
-    var h2 = el('h2', 'uc-fund__give', show === 'form' ? FUND_TEXT.givePepp : FUND_TEXT.give);
+    var h2 = el('h2', 'uc-fund__give', camp === PEPP_ID ? FUND_TEXT.givePepp : FUND_TEXT.give);
     h2.id = 'din-gava';
     side.appendChild(h2);
     if (show === 'form') side.appendChild(shown);
@@ -1050,7 +1051,7 @@
       if (e) side.appendChild(e);
     });
     head.parentNode.insertBefore(side, head.nextSibling);
-    if (show === 'form') {
+    if (camp === PEPP_ID) {
       var msg = document.getElementById('message');
       var lab = msg && msg.parentNode ? msg.parentNode.querySelector('label') : null;
       if (lab) lab.textContent = FUND_TEXT.messagePepp;
