@@ -368,6 +368,26 @@
     return p;
   }
 
+  /* Adoveo minns i sessionen det senaste filtret till /getP2PCards och
+     ritar sedan Summary-sidans lista "Pågående insamlingar" efter det.
+     En fråga per koncept (t.ex. summan på en Pepp-insamling) gav alltså
+     bara Pepp-insamlingar, i fel ordning, när man backade till Summary.
+     Varje filtrerad fråga följs därför av en ofiltrerad som återställer
+     listan: alla koncept, senast startad först. */
+  function cardsByConcept(camp, single, fol) {
+    var get = function (o) {
+      return fetch('/getP2PCards?' + new URLSearchParams(o), { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+    };
+    return inLine(function () {
+      return get({ offset: 0, limit: 1000, campaign_id: camp, single_campaign_id: single, folder: fol })
+        .then(function (r) { return r.json(); })
+        .then(function (j) {
+          return get({ offset: 0, limit: 1, campaign_id: camp, folder: fol })
+            .then(function () { return j; }, function () { return j; });
+        });
+    });
+  }
+
   function fetchHits(q) {
     /* Vänta in konceptfrågorna om de pågår: Adoveo tål inte samtidiga frågor */
     var wait = conceptBusy && conceptMap ? conceptMap : Promise.resolve();
@@ -505,11 +525,7 @@
     conceptBusy = true;
     conceptMap = MENU_MAIN.reduce(function (prev, c) {
       return prev.then(function () {
-        var q = new URLSearchParams({ offset: 0, limit: 1000, campaign_id: camp, single_campaign_id: c.id, folder: fol });
-        return inLine(function () {
-          return fetch('/getP2PCards?' + q, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-            .then(function (r) { return r.json(); });
-        })
+        return cardsByConcept(camp, c.id, fol)
           .then(function (j) {
             var doc = new DOMParser().parseFromString((j && j.html) || '', 'text/html');
             doc.querySelectorAll('.cc-card a[href]').forEach(function (a) {
@@ -1210,11 +1226,7 @@
     var code = p2pCode(location.pathname);
     var camp = (document.getElementById('campaign-id') || {}).value;
     if (!code || !camp) return;
-    var q = new URLSearchParams({ offset: 0, limit: 1000, campaign_id: SUMMARY_ID, single_campaign_id: camp, folder: FOLDER });
-    inLine(function () {
-      return fetch('/getP2PCards?' + q, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-        .then(function (r) { return r.json(); });
-    }).then(function (j) {
+    cardsByConcept(SUMMARY_ID, camp, FOLDER).then(function (j) {
       var doc = new DOMParser().parseFromString((j && j.html) || '', 'text/html');
       var hit = null;
       doc.querySelectorAll('.cc-card').forEach(function (c) {
