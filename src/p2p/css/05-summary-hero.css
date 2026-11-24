@@ -48,7 +48,7 @@
     line-height: 1;
     text-align: left;
     text-wrap: balance;
-    color: var(--uc-red);
+    color: var(--uc-black);
 }
 .uc-hero #page-title + .cc-txt {
     max-width: 24ch;
