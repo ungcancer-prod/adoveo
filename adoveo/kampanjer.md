@@ -38,6 +38,20 @@ bort. (Ligger den kvar gör det inget — scriptet använder den då i stället.
 | 299 | Pepp | vit i färgväljaren | `inputfalt/299-pepp.html` |
 | 308 | Infosida | – | `inputfalt/308-info.html` |
 
+### Insamlingsmålet på insamlingssidan
+
+Mätaren (Utmaning, Födelsedag) läser målet ur beskrivningen. I mallen för
+titelraden i admin ska målfältet stå inom ett märke, så här:
+
+```
+[mål:{custom_field_1}]
+```
+
+Scriptet läser siffran och tar bort märket ur texten, så det syns inte på
+sidan. Utan märke visas bara summan, utan mätare. Hur insamlat visas per
+koncept styrs av `FUND_SHOW` i `src/p2p/js/uc-p2p.js`. På skapa-sidan
+förifylls fältet vars etikett innehåller "mål" med 1 000 kr (`GOAL_DEFAULT`).
+
 Insamlingssidorna (`/p/…`) som varje insamlare får hämtar sin kod och färg
 från sin konceptkampanj — de behöver inget eget.
 
