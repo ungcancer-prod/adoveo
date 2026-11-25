@@ -121,6 +121,38 @@
   var SUMMARY_URL = BASE + '294/';
   var SUMMARY_ID  = '294';                     /* sökningen frågar alltid med Summary-kampanjens id */
   var FOLDER      = 'P2P-2026-WIP';            /* Adoveo-mappen; BYT om mappen byter namn */
+
+  /* Äldre kampanjer i mappen, från tiden före koncepten. Deras insamlingar
+     räknas till ett koncept: etikett och färg på korten, pengarna på
+     konceptkortet och i totalen, och samma design på insamlingssidan.
+     OLD_CAMPAIGNS: kampanj -> koncept för hela kampanjen (null = välj per
+     insamling i CARD_CONCEPT, koden ur /p/<kod>). HIDE_CARDS: insamlingar
+     som inte visas i listorna (finns kvar i Adoveo). Beslut 2026-11-25. */
+  var OLD_CAMPAIGNS = {
+    '271': '297',                               /* Göteborgsvarvet 2026 -> Utmaning */
+    '208': null                                 /* blandade egna insamlingar, se CARD_CONCEPT */
+  };
+  var CARD_CONCEPT = {
+    '3ff11529a': '295',                         /* Natalie Aho, födelsedag */
+    'ec96112da': '295',                         /* Erik Stål, "65kr" */
+    '206114f03': '297',                         /* Kadir Meral, Göteborgsvarvet */
+    '576717f5c': '297',                         /* Louisa Adde, Inverness Half Marathon */
+    '3d3e17f60': '297',                         /* Louisa Adde, Inverness Half Marathon */
+    'ad1f13e1b': '297',                         /* Johan & Filiph, Vätternrundan */
+    '00c81090b': '299',                         /* Monica Rosén */
+    'f23a128a2': '299',                         /* Nathalie Alriksson */
+    '9f9510919': '299',                         /* Anna Olsheimer, Fuck Sarkom */
+    '11e1133db': '299',                         /* Monika */
+    'f2971389b': '299'                          /* Vera Mannheimer */
+  };
+  var HIDE_CARDS = ['0b9b1863a', '1e1811149', 'c25910f28'];   /* Marika, Martin, Håkan: annat ändamål */
+  function hiddenCard(code) { return HIDE_CARDS.indexOf(code) !== -1; }
+  /* Konceptet för en sida eller ett kort: kampanjens egen, annars via de äldre kampanjerna */
+  function conceptIdOf(camp, code) {
+    if (byId(camp)) return camp;
+    if (code && CARD_CONCEPT[code]) return CARD_CONCEPT[code];
+    return OLD_CAMPAIGNS[camp] || null;
+  }
   var MAX_HITS    = 6;                         /* kort i sökpanelen, resten via "Visa alla" */
 
   var root = document.documentElement;
@@ -254,6 +286,10 @@
        läses, annars kan ett mellanläge läsas av */
     var t = w.style.transition;
     w.style.transition = 'none';
+    /* Äldre kampanj (OLD_CAMPAIGNS): konceptets färg i stället för adminens */
+    var camp = (document.getElementById('campaign-id') || {}).value;
+    var oc = camp && !byId(camp) ? byId(conceptIdOf(camp, p2pCode(location.pathname))) : null;
+    if (oc) w.style.setProperty('background-color', oc.bg, 'important');
     var m = getComputedStyle(w).backgroundColor.match(/[\d.]+/g);
     w.style.transition = t;
     if (!m) return;
@@ -431,9 +467,9 @@
       box.appendChild(el('p', 'uc-search__empty', 'Ingen insamling matchar "' + q + '". Prova förnamnet eller kolla stavningen.'));
       return;
     }
-    box.appendChild(el('p', 'uc-search__label', 'Pågående insamlingar'));
+    box.appendChild(el('p', 'uc-search__label', 'Alla insamlingar'));
     var grid = el('ul', 'uc-search__grid');
-    hits.slice(0, MAX_HITS).forEach(function (h) {
+    hits.filter(function (h) { return !hiddenCard(p2pCode(h.href)); }).slice(0, MAX_HITS).forEach(function (h) {
       var li = el('li');
       var a = el('a', 'uc-search__card');
       a.href = h.href;
@@ -509,6 +545,7 @@
      klick på "Se fler" och "Sök" kvar tills frågorna är klara, och
      resultatet sparas i 10 minuter så att det inte hämtas vid varje sidbyte. */
   var conceptMap = null, conceptBusy = false, heldClick = null;
+  var conceptExtra = {};                        /* koncept-id -> kronor från äldre kampanjer */
   var CONCEPT_CACHE = 'uc-koncept', CONCEPT_TTL = 10 * 60 * 1000;
   function byId(id) {
     return MENU_MAIN.filter(function (c) { return c.id === id; })[0] || null;
@@ -521,13 +558,32 @@
       if (saved && age >= 0 && CONCEPT_TTL >= age) {
         var m0 = {};
         Object.keys(saved.m).forEach(function (k) { var c = byId(saved.m[k]); if (c) m0[k] = c; });
+        conceptExtra = saved.x || {};
         return (conceptMap = Promise.resolve(m0));
       }
     } catch (e) { /* ingen sessionStorage: hämta */ }
     var camp = (document.querySelector('#campaignId') || {}).value || SUMMARY_ID;
     var fol = (document.querySelector('#folder') || {}).value || FOLDER;
-    var map = {}, ids = {};
+    var map = {}, ids = {}, extra = {};
     conceptBusy = true;
+    /* De äldre kampanjerna: korten kopplas till sitt koncept och beloppen
+       läggs till konceptets summa */
+    var old = Object.keys(OLD_CAMPAIGNS).map(function (oid) {
+      return function () {
+        return cardsByConcept(camp, oid, fol).then(function (j) {
+          var doc = new DOMParser().parseFromString((j && j.html) || '', 'text/html');
+          doc.querySelectorAll('.cc-card').forEach(function (card) {
+            var a = card.querySelector('a[href]');
+            var k = a ? p2pCode(a.getAttribute('href')) : '';
+            var c = k ? byId(conceptIdOf(oid, k)) : null;
+            if (!c) return;
+            map[k] = c; ids[k] = c.id;
+            var sums = card.querySelectorAll('span.cc-title');
+            if (sums.length) extra[c.id] = (extra[c.id] || 0) + amountOf(sums[sums.length - 1].textContent);
+          });
+        }).catch(function () { /* utan svar: korten får ingen etikett */ });
+      };
+    });
     conceptMap = MENU_MAIN.reduce(function (prev, c) {
       return prev.then(function () {
         return cardsByConcept(camp, c.id, fol)
@@ -541,8 +597,11 @@
           .catch(function () { /* ett koncept utan svar: korten får ingen etikett */ });
       });
     }, Promise.resolve()).then(function () {
+      return old.reduce(function (prev, f) { return prev.then(f); }, Promise.resolve());
+    }).then(function () {
       conceptBusy = false;
-      try { sessionStorage.setItem(CONCEPT_CACHE, JSON.stringify({ t: Date.now(), m: ids })); } catch (e) { /* ok */ }
+      conceptExtra = extra;
+      try { sessionStorage.setItem(CONCEPT_CACHE, JSON.stringify({ t: Date.now(), m: ids, x: extra })); } catch (e) { /* ok */ }
       if (heldClick) { var b = heldClick; heldClick = null; b.click(); }
       return map;
     });
@@ -587,6 +646,10 @@
   function upgradeCard(card, map) {
     if (card.classList.contains('uc-fcard')) { conceptLabel(card, map); return; }
     var a = card.querySelector('a[href]');
+    if (a && hiddenCard(p2pCode(a.getAttribute('href')))) {
+      card.style.setProperty('display', 'none', 'important');
+      return;
+    }
     var title = card.querySelector('p.cc-title');
     if (!a || !title) return;
     var img = card.querySelector('img');
@@ -627,7 +690,7 @@
         b.querySelectorAll('.cc-card').forEach(function (c) {
           upgradeCard(c, map);
           var a = c.querySelector('.uc-fcard__link');
-          if (map && a && !map[p2pCode(a.getAttribute('href'))]) unknown = true;
+          if (map && a && !map[p2pCode(a.getAttribute('href'))]) unknown = true;   /* dolda kort har ingen .uc-fcard__link */
         });
       });
       /* En insamling som startats efter att konceptlistan sparades (10 min)
@@ -640,7 +703,7 @@
       }
     };
     run();
-    loadConcepts().then(function (m) { map = m; run(); });
+    loadConcepts().then(function (m) { map = m; run(); addOldSums(); });
     var mo = new MutationObserver(run);                  /* "Se fler" och sökresultat */
     boxes.forEach(function (b) { mo.observe(b, { childList: true }); });
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () {
@@ -653,15 +716,33 @@
      samma kort och rutnät som på Summary, men bara konceptets insamlingar
      (senast startad först) och utan sökruta. Tre i taget, som på Summary.
      Inga insamlingar = ingen rubrik. */
-  var LIST_TEXT = { title: 'Pågående insamlingar', more: 'Se fler' };
+  var LIST_TEXT = { title: 'Alla insamlingar', more: 'Se fler' };
   var LIST_STEP = 3;
   function conceptList() {
     var m = location.pathname.match(/\/start\/(\d+)/);
     var c = m ? byId(m[1]) : null;
     if (!c || !document.getElementById('phase-before-coupon') || document.querySelector('.uc-fundlist')) return;
-    cardsByConcept(SUMMARY_ID, c.id, FOLDER).then(function (j) {
+    var cards = [];
+    var collect = function (j, oid) {
       var doc = new DOMParser().parseFromString((j && j.html) || '', 'text/html');
-      var cards = Array.prototype.slice.call(doc.querySelectorAll('.cc-card'));
+      doc.querySelectorAll('.cc-card').forEach(function (card) {
+        var a = card.querySelector('a[href]');
+        var k = a ? p2pCode(a.getAttribute('href')) : '';
+        if (hiddenCard(k)) return;
+        if (oid && conceptIdOf(oid, k) !== c.id) return;
+        cards.push(card);
+      });
+    };
+    /* Konceptets egna insamlingar först (senast startad först), sedan de
+       äldre kampanjernas som räknas till konceptet */
+    var olds = Object.keys(OLD_CAMPAIGNS).filter(function (oid) {
+      return OLD_CAMPAIGNS[oid] === c.id || OLD_CAMPAIGNS[oid] === null;   /* null: korten väljs ett och ett i collect */
+    });
+    olds.reduce(function (prev, oid) {
+      return prev.then(function () {
+        return cardsByConcept(SUMMARY_ID, oid, FOLDER).then(function (j) { collect(j, oid); }, function () {});
+      });
+    }, cardsByConcept(SUMMARY_ID, c.id, FOLDER).then(function (j) { collect(j, null); })).then(function () {
       if (!cards.length) return;
       var map = {};
       cards.forEach(function (card) {
@@ -755,8 +836,28 @@
   /* Konceptkorten på Summary ({29X total_collected} kr) */
   function formatPrices() {
     document.querySelectorAll('.p2p-main .campaignsDisplay .cc-price').forEach(function (p) {
-      if (/\d/.test(p.textContent)) p.textContent = kr(amountOf(p.textContent));
+      if (!/\d/.test(p.textContent)) return;
+      if (!p.dataset.ucBase) p.dataset.ucBase = String(amountOf(p.textContent));
+      p.textContent = kr(amountOf(p.textContent));
     });
+  }
+  /* Pengarna från de äldre kampanjerna (OLD_CAMPAIGNS) läggs på
+     konceptkortens belopp, och totalen räknas om */
+  function addOldSums() {
+    var changed = false;
+    document.querySelectorAll('.p2p-main .campaignsDisplay .cc-card').forEach(function (card) {
+      var a = card.querySelector('a[href]');
+      var m = a ? a.getAttribute('href').match(/\/start\/(\d+)/) : null;
+      var p = card.querySelector('.cc-price');
+      if (!m || !p || !p.dataset.ucBase) return;
+      var sum = (+p.dataset.ucBase) + (conceptExtra[m[1]] || 0);
+      if (p.textContent !== kr(sum)) { p.textContent = kr(sum); changed = true; }
+    });
+    var t = document.querySelector('.uc-total__sum');
+    if (!t || !changed) return;
+    var total = 0;
+    document.querySelectorAll('.p2p-main .campaignsDisplay .cc-price').forEach(function (p) { total += amountOf(p.textContent); });
+    t.textContent = kr(total);
   }
 
   /* ---------- Tillsammans har vi samlat in ---------- */
@@ -1089,7 +1190,8 @@
     var media = document.getElementById('page-title-swish-form');
     if (!wrap || !sub || !media || wrap.classList.contains('uc-fund')) return;
     var camp = (document.getElementById('campaign-id') || {}).value;
-    var show = FUND_SHOW[camp] || 'small';
+    var cid = conceptIdOf(camp, p2pCode(location.pathname)) || camp;   /* äldre kampanj: konceptets regler */
+    var show = FUND_SHOW[cid] || 'small';
 
     /* Titelraden: texten före <span> är rubriken, <span> beskrivningen */
     var desc = sub.querySelector('span');
@@ -1126,7 +1228,7 @@
     /* Högerspalten: Din gåva + formuläret. Plattformens element flyttas
        hit i sin ordning (Swish-instruktionen #showText under rubriken). */
     var side = el('div', 'uc-fund__side');
-    var h2 = el('h2', 'uc-fund__give', camp === PEPP_ID ? FUND_TEXT.givePepp : FUND_TEXT.give);
+    var h2 = el('h2', 'uc-fund__give', cid === PEPP_ID ? FUND_TEXT.givePepp : FUND_TEXT.give);
     h2.id = 'din-gava';
     side.appendChild(h2);
     if (show === 'form') side.appendChild(shown);
@@ -1135,7 +1237,7 @@
       if (e) side.appendChild(e);
     });
     head.parentNode.insertBefore(side, head.nextSibling);
-    if (camp === PEPP_ID) {
+    if (cid === PEPP_ID) {
       var msg = document.getElementById('message');
       var lab = msg && msg.parentNode ? msg.parentNode.querySelector('label') : null;
       if (lab) lab.textContent = FUND_TEXT.messagePepp;
