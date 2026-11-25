@@ -825,6 +825,11 @@ html.uc-fund-page #wrap-default {
     align-items: baseline;
     gap: var(--sp-4);
 }
+/* Utan mål: "insamlat" direkt efter summan, inte ute i högerkanten där procenten står */
+.uc-fund__meter-row--nogoal {
+    justify-content: flex-start;
+    gap: var(--sp-2);
+}
 .uc-fund__meter-sum {
     font-family: var(--font-head);
     font-size: 5.6rem;                 /* 56px */

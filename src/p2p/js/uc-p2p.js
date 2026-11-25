@@ -1395,7 +1395,7 @@
       row.appendChild(el('span', 'uc-fund__meter-sum', kr(sum)));
       if (goal && show === 'small') row.appendChild(el('span', null, FUND_TEXT.of + ' ' + kr(goal)));
       if (goal && show === 'meter') row.appendChild(el('span', 'uc-fund__meter-pct', pct + ' %'));
-      if (!goal) row.appendChild(el('span', null, FUND_TEXT.collected));
+      if (!goal) { row.classList.add('uc-fund__meter-row--nogoal'); row.appendChild(el('span', null, FUND_TEXT.collected)); }
       box.appendChild(row);
       if (goal) {
         box.appendChild(bar());
