@@ -299,15 +299,51 @@ hr.divider {
         opacity: 0.35;
     }
 }
+/* Mobil: en tidslinje. Ringen till vänster, texten bredvid och samma
+   tunna linje som på desktop, lodrätt mellan ringarna. Blocket står
+   centrerat på sidan men läses vänsterställt. Ringen sitter alltid
+   överst i steget (första raden är minst en ring hög), så linjen räcker
+   ringen till ring även om en text blir två rader. */
 @media (max-width: 799px) {
     .uc-steps {
         --uc-ring: 48px;
-        gap: var(--sp-6);
+        --uc-steps-gap: var(--sp-6);   /* 32px: linjen blir ca 20px */
+        display: grid;
+        gap: var(--uc-steps-gap);
+        width: fit-content;
+        max-width: 100%;
         margin-bottom: 64px;
     }
+    .uc-step {
+        display: grid;
+        grid-template-columns: var(--uc-ring) minmax(0, 1fr);
+        grid-auto-rows: minmax(var(--uc-ring), auto);
+        column-gap: var(--sp-4);
+        text-align: left;
+    }
     .uc-steps .uc-step-number {
-        margin-bottom: var(--sp-3);
+        grid-column: 1;
+        grid-row: 1;
+        align-self: start;
+        margin: 0;
         font-size: 2.4rem;            /* 24px */
+    }
+    .uc-step > :not(.uc-step-number) {
+        grid-column: 2;
+        align-self: center;
+        margin: 0;
+        max-width: 26ch;
+        text-align: left;
+    }
+    .uc-step:not(:last-child)::after {    /* linjen ned till nästa ring */
+        content: '';
+        position: absolute;
+        left: calc(var(--uc-ring) / 2 - var(--border-w) / 2);
+        top: calc(var(--uc-ring) + 6px);
+        height: calc(100% - var(--uc-ring) + var(--uc-steps-gap) - 12px);
+        width: var(--border-w);
+        background-color: currentColor;
+        opacity: 0.35;
     }
 }
 /* =========================================
