@@ -758,6 +758,16 @@ html.uc-fund-page #wrap-default {
     hyphens: manual;
     color: var(--uc-concept-ink);      /* svart, krämvit på mörk yta (Till minne) */
 }
+/* Levnadsåren (Till minne) under namnet: lugn brödtext, rubriken bär
+   uttrycket */
+.uc-fund .uc-fund__years {
+    margin: var(--sp-3) 0 0;
+    font-family: var(--font-body);
+    font-size: var(--fs-h4);           /* 20px */
+    line-height: 1.3;
+    letter-spacing: 0.04em;
+    color: var(--uc-concept-ink);
+}
 /* Beskrivningen: ca 60 tecken per rad, kortas med Läs mer */
 .uc-fund__desc {
     margin-top: var(--sp-5);
@@ -993,6 +1003,7 @@ html.uc-fund-page #wrap-default {
     .uc-fund--noimg .uc-fund__head > .uc-fund__title {
         margin-top: var(--sp-6);
     }
+    .uc-fund__head > .uc-fund__years { order: 1; }   /* efter rubriken (samma order, DOM-ordning) */
     .uc-fund__head > .uc-fund__desc { order: 2; }
     .uc-fund__head > :is(.uc-fund__meter, .uc-fund__impact) { order: 3; }
     .uc-fund__side > * { order: 4; }

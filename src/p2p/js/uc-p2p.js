@@ -94,6 +94,10 @@
      [mål:{goal}] ({goal} = Adoveos fält Progress Goal). Scriptet läser siffran och tar bort märket. */
   var GOAL_MARK = /\[\s*mål\s*:\s*([\d\s.,]*)\]/i;
   var GOAL_ANY  = /\[\s*mål\s*:[^\]]*\]/gi;   /* även orenderat: [mål:{goal}] i förhandsvisningen */
+  /* Levnadsår (Till minne): [år:{custom_field_2}] i beskrivningsmallen,
+     visas mellan namnet och beskrivningen. Tomt fält = ingenting. */
+  var YEARS_MARK = /\[\s*år\s*:\s*([^\]]*)\]/i;
+  var YEARS_ANY  = /\[\s*år\s*:[^\]]*\]/gi;
   /* Skapa-sidan: förvalt insamlingsmål och snabbval (fältet vars etikett
      innehåller "mål"). */
   var GOAL_DEFAULT = 1000;
@@ -897,6 +901,7 @@
         var w = document.createTreeWalker(msg, NodeFilter.SHOW_TEXT), t = null, m = null;
         while (w.nextNode()) {
           if (GOAL_ANY.test(w.currentNode.nodeValue)) w.currentNode.nodeValue = w.currentNode.nodeValue.replace(GOAL_ANY, '');
+          if (YEARS_ANY.test(w.currentNode.nodeValue)) w.currentNode.nodeValue = w.currentNode.nodeValue.replace(YEARS_ANY, '');
           m = w.currentNode.nodeValue.match(/\{(your_name|description)\}/);
           if (m) { t = w.currentNode; break; }
         }
@@ -1094,10 +1099,12 @@
     }
     title = title.replace(/\s+/g, ' ').trim();
     var goal = desc ? takeGoal(desc) : 0;
+    var years = desc ? takeYears(desc) : '';
 
-    /* Vänsterspalten: rubrik, beskrivning, insamlat, vägg */
+    /* Vänsterspalten: rubrik, levnadsår, beskrivning, insamlat, vägg */
     var head = el('div', 'uc-fund__head');
     head.appendChild(el('h1', 'uc-fund__title', title));
+    if (years) head.appendChild(el('p', 'uc-fund__years', years));
     if (desc && desc.textContent.trim()) {
       var box = el('div', 'uc-fund__desc');
       desc.className = 'uc-fund__desc-text';
@@ -1176,6 +1183,21 @@
   }
 
   /* Målet ur beskrivningen: [mål:1000] läses och tas bort ur texten */
+  /* Levnadsåren ur markören [år:...]; markören tas bort ur beskrivningen.
+     Bindestreck mellan årtal blir tankstreck: 1987-2024 -> 1987–2024. */
+  function takeYears(desc) {
+    var years = '';
+    var w = document.createTreeWalker(desc, NodeFilter.SHOW_TEXT);
+    while (w.nextNode()) {
+      var t = w.currentNode, m = t.nodeValue.match(YEARS_MARK);
+      if (!m) continue;
+      years = m[1].replace(/\s*[-–—]\s*/g, '\u2013').replace(/\s+/g, ' ').trim();
+      if (/\{[^}]*\}/.test(years)) years = '';      /* shortcoden orenderad */
+      t.nodeValue = t.nodeValue.replace(YEARS_MARK, '').replace(/[ \t]+$/, '');
+    }
+    return years;
+  }
+
   function takeGoal(desc) {
     var goal = 0;
     var w = document.createTreeWalker(desc, NodeFilter.SHOW_TEXT);
