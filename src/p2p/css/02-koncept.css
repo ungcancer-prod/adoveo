@@ -741,6 +741,14 @@ html.uc-fund-page #wrap-default {
     display: none;
 }
 
+/* 10.2b Adoveos egen mätare (.progress-bar + .goal-line) renderas på
+   insamlingssidorna i vissa kampanjer (208, inte 271 eller 295-299) och
+   hamnar då under väggen, ofta med målet 0. Sidan har redan insamlat
+   per koncept (fundShown), så Adoveos döljs. */
+.uc-fund > :is(.progress-bar, .goal-line) {
+    display: none;
+}
+
 /* 10.3 Vänsterspalten */
 /* Rubriken: handstil i rött. Ord som inte ryms på en rad krymper
    rubriken i stället för att brytas (fitTitle i scriptet). */
