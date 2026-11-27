@@ -145,6 +145,19 @@
     '11e1133db': '299',                         /* Monika */
     'f2971389b': '299'                          /* Vera Mannheimer */
   };
+  /* Historiskt insamlat på BetterNow (egen-insamling.ungcancer.se) per
+     koncept, en fast botten på konceptkorten och i totalen. Adoveos egna
+     belopp läggs ovanpå. Genomgång 2026-11-27 av alla 77 insamlingar
+     (1 612 021 kr) efter vad insamlaren gjorde; därtill 174 684 kr i
+     gåvor direkt till projektet "Ung Cancers allmänna arbete", lagda på
+     Pepp. Summa 1 786 705 kr = BetterNows egen total. Lista per
+     insamling: adoveo/betternow-historik.md */
+  var HISTORY = {
+    '295': 150500,                              /* Födelsedag, 10 insamlingar */
+    '297': 596423,                              /* Utmaning, 33 insamlingar */
+    '298': 684541,                              /* Till minne, 20 insamlingar */
+    '299': 355241                               /* Pepp, 14 insamlingar + direktgåvor 174 684 */
+  };
   var HIDE_CARDS = [
     '0b9b1863a', '1e1811149', 'c25910f28',      /* Marika, Martin, Håkan: annat ändamål */
     'b24016774', '438516770',                   /* Pepp: Catch all test, Daniel test (syns inte i admin) */
@@ -851,10 +864,14 @@
 
   /* Konceptkorten på Summary ({29X total_collected} kr) */
   function formatPrices() {
-    document.querySelectorAll('.p2p-main .campaignsDisplay .cc-price').forEach(function (p) {
-      if (!/\d/.test(p.textContent)) return;
-      if (!p.dataset.ucBase) p.dataset.ucBase = String(amountOf(p.textContent));
-      p.textContent = kr(amountOf(p.textContent));
+    document.querySelectorAll('.p2p-main .campaignsDisplay .cc-card').forEach(function (card) {
+      var p = card.querySelector('.cc-price');
+      if (!p || !/\d/.test(p.textContent) || p.dataset.ucBase) return;
+      var a = card.querySelector('a[href]');
+      var m = a ? a.getAttribute('href').match(/\/start\/(\d+)/) : null;
+      p.dataset.ucBase = String(amountOf(p.textContent));                 /* Adoveos belopp */
+      p.dataset.ucHistory = String((m && HISTORY[m[1]]) || 0);            /* BetterNow-botten */
+      p.textContent = kr(+p.dataset.ucBase + (+p.dataset.ucHistory));
     });
   }
   /* Pengarna från de äldre kampanjerna (OLD_CAMPAIGNS) läggs på
@@ -866,7 +883,7 @@
       var m = a ? a.getAttribute('href').match(/\/start\/(\d+)/) : null;
       var p = card.querySelector('.cc-price');
       if (!m || !p || !p.dataset.ucBase) return;
-      var sum = (+p.dataset.ucBase) + (conceptExtra[m[1]] || 0);
+      var sum = (+p.dataset.ucBase) + (+p.dataset.ucHistory || 0) + (conceptExtra[m[1]] || 0);
       if (p.textContent !== kr(sum)) { p.textContent = kr(sum); changed = true; }
     });
     var t = document.querySelector('.uc-total__sum');
