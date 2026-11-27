@@ -147,14 +147,6 @@
   };
   var HIDE_CARDS = ['0b9b1863a', '1e1811149', 'c25910f28'];   /* Marika, Martin, Håkan: annat ändamål */
   function hiddenCard(code) { return HIDE_CARDS.indexOf(code) !== -1; }
-  /* Startordning: koden i /p/<kod> är fyra slumptecken + ett löpnummer
-     i hex (884718672 -> 0x18672). Högre löpnummer = startad senare.
-     Adoveo sorterar inte listan i startordning när den hämtas per mapp. */
-  function startedOf(code) { return parseInt(String(code || '').slice(4), 16) || 0; }
-  function byStarted(a, b) {
-    var ka = a.querySelector('a[href]'), kb = b.querySelector('a[href]');
-    return startedOf(kb ? p2pCode(kb.getAttribute('href')) : '') - startedOf(ka ? p2pCode(ka.getAttribute('href')) : '');
-  }
   /* Konceptet för en sida eller ett kort: kampanjens egen, annars via de äldre kampanjerna */
   function conceptIdOf(camp, code) {
     if (byId(camp)) return camp;
@@ -422,7 +414,7 @@
      En fråga per koncept (t.ex. summan på en Pepp-insamling) gav alltså
      bara Pepp-insamlingar, i fel ordning, när man backade till Summary.
      Varje filtrerad fråga följs därför av en ofiltrerad som återställer
-     listan: alla koncept, senast startad först. */
+     listan: alla koncept, i den ordning som Sort by i 294-admin anger. */
   function cardsByConcept(camp, single, fol) {
     var get = function (o) {
       return fetch('/getP2PCards?' + new URLSearchParams(o), { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
@@ -688,44 +680,6 @@
     clampText(card);
     if (cardResize) cardResize.observe(card);
   }
-  /* Listan på Summary i startordning: hela listan hämtas en gång,
-     sorteras med senast startad först och visas tre i taget (som
-     plattformens). Plattformens Se fler göms och ersätts. Sökresultaten
-     (#searchDisplay) är plattformens som förut. */
-  function summaryOrder() {
-    var box = document.getElementById('fundraisersDisplay');
-    var btn = document.getElementById('viewMoreBtn');
-    if (!box || !btn || box.dataset.ucOrder) return;
-    box.dataset.ucOrder = '1';
-    var camp = (document.querySelector('#campaignId') || {}).value || SUMMARY_ID;
-    var fol = (document.querySelector('#folder') || {}).value || FOLDER;
-    var step = parseInt((document.querySelector('input[name=cardsPerLoad]') || {}).value, 10) || 3;
-    inLine(function () {
-      return fetch('/getP2PCards?' + new URLSearchParams({ offset: 0, limit: 1000, campaign_id: camp, folder: fol }),
-        { headers: { 'X-Requested-With': 'XMLHttpRequest' } }).then(function (r) { return r.json(); });
-    }).then(function (j) {
-      var doc = new DOMParser().parseFromString((j && j.html) || '', 'text/html');
-      var cards = Array.prototype.slice.call(doc.querySelectorAll('.cc-card')).filter(function (card) {
-        var a = card.querySelector('a[href]');
-        return a && !hiddenCard(p2pCode(a.getAttribute('href')));
-      });
-      if (!cards.length) return;
-      cards.sort(byStarted);
-      var more = el('button', 'cc-button cc-btn-third uc-fundlist__more', LIST_TEXT.more);
-      more.type = 'button';
-      btn.style.setProperty('display', 'none', 'important');
-      btn.parentNode.insertBefore(more, btn.nextSibling);
-      var shown = 0;
-      var next = function () {
-        cards.slice(shown, shown + step).forEach(function (card) { box.appendChild(document.importNode(card, true)); });
-        shown = Math.min(cards.length, shown + step);
-        more.hidden = shown === cards.length;
-      };
-      more.addEventListener('click', next);
-      box.textContent = '';                       /* fundraiserCards bygger om korten (MutationObserver) */
-      next();
-    }).catch(function () { /* plattformens lista ligger kvar */ });
-  }
   function fundraiserCards() {
     var boxes = document.querySelectorAll('#fundraisersDisplay, #searchDisplay');
     if (!boxes.length) return;
@@ -760,7 +714,8 @@
   /* ---------- Pågående insamlingar på konceptets startsida ---------- */
   /* Skapa-sidan (/start/295/ osv.) har ingen egen lista. Här byggs en med
      samma kort och rutnät som på Summary, men bara konceptets insamlingar
-     (senast startad först) och utan sökruta. Tre i taget, som på Summary.
+     och utan sökruta. Ordningen är Summarys (Sort by i 294-admin). Tre i
+     taget, som på Summary.
      Inga insamlingar = ingen rubrik. */
   var LIST_TEXT = { title: 'Alla insamlingar', more: 'Se fler' };
   var LIST_STEP = 3;
@@ -768,19 +723,19 @@
     var m = location.pathname.match(/\/start\/(\d+)/);
     var c = m ? byId(m[1]) : null;
     if (!c || !document.getElementById('phase-before-coupon') || document.querySelector('.uc-fundlist')) return;
-    var cards = [];
+    var mine = {}, cards = [];
     var collect = function (j, oid) {
       var doc = new DOMParser().parseFromString((j && j.html) || '', 'text/html');
-      doc.querySelectorAll('.cc-card').forEach(function (card) {
-        var a = card.querySelector('a[href]');
-        var k = a ? p2pCode(a.getAttribute('href')) : '';
-        if (hiddenCard(k)) return;
+      doc.querySelectorAll('.cc-card a[href]').forEach(function (a) {
+        var k = p2pCode(a.getAttribute('href'));
+        if (!k || hiddenCard(k)) return;
         if (oid && conceptIdOf(oid, k) !== c.id) return;
-        cards.push(card);
+        mine[k] = true;
       });
     };
-    /* Konceptets egna insamlingar och de äldre kampanjernas som räknas
-       till konceptet, sorterade med senast startad först */
+    /* Vilka insamlingar hör till konceptet: konceptets egna och de äldre
+       kampanjernas som räknas dit. Sedan hela listan ofiltrerad, i
+       Summarys ordning, och bara konceptets kort behålls. */
     var olds = Object.keys(OLD_CAMPAIGNS).filter(function (oid) {
       return OLD_CAMPAIGNS[oid] === c.id || OLD_CAMPAIGNS[oid] === null;   /* null: korten väljs ett och ett i collect */
     });
@@ -789,8 +744,17 @@
         return cardsByConcept(SUMMARY_ID, oid, FOLDER).then(function (j) { collect(j, oid); }, function () {});
       });
     }, cardsByConcept(SUMMARY_ID, c.id, FOLDER).then(function (j) { collect(j, null); })).then(function () {
+      return inLine(function () {
+        return fetch('/getP2PCards?' + new URLSearchParams({ offset: 0, limit: 1000, campaign_id: SUMMARY_ID, folder: FOLDER }),
+          { headers: { 'X-Requested-With': 'XMLHttpRequest' } }).then(function (r) { return r.json(); });
+      });
+    }).then(function (j) {
+      var doc = new DOMParser().parseFromString((j && j.html) || '', 'text/html');
+      doc.querySelectorAll('.cc-card').forEach(function (card) {
+        var a = card.querySelector('a[href]');
+        if (a && mine[p2pCode(a.getAttribute('href'))]) cards.push(card);
+      });
       if (!cards.length) return;
-      cards.sort(byStarted);
       var map = {};
       cards.forEach(function (card) {
         var a = card.querySelector('a[href]');
@@ -1629,7 +1593,7 @@
 
     /* Varje del körs för sig: kraschar en, fungerar resten ändå
        (t.ex. att headern göms vid scroll) */
-    [buildFooter, conceptList, buildHero, conceptCards, formatPrices, buildTotal, makeAnchors, summaryOrder, fundraiserCards, conceptSteps, inlineQr, createLayout, uploadWatch, endBackground, goalDefault, fundraiserPage, greetingWall].forEach(function (fn) {
+    [buildFooter, conceptList, buildHero, conceptCards, formatPrices, buildTotal, makeAnchors, fundraiserCards, conceptSteps, inlineQr, createLayout, uploadWatch, endBackground, goalDefault, fundraiserPage, greetingWall].forEach(function (fn) {
       try { fn(); } catch (e) { if (window.console) console.warn('[uc-p2p] ' + fn.name, e); }
     });
 
