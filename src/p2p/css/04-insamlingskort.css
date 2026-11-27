@@ -103,6 +103,7 @@
     transform: scale(1.03);
 }
 .uc-fcard__body {
+    align-self: stretch;               /* plattformens .cc-card centrerar barnen; utan den krymper rutan till texten när beskrivningen är kort */
     flex: 1 1 0;
     min-height: 0;
     display: flex;
