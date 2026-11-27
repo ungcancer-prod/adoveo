@@ -1692,3 +1692,60 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { buildShapes(); buildHeader(); init(); });
   else { buildShapes(); buildHeader(); init(); }
 })();
+
+/* ---------- Se fler: jämna steg ----------
+   Adoveos "Se fler" laddar cardsPerLoad kort (3, ställs in i 294-admin). Kort i
+   HIDE_CARDS döljs först efteråt, så ett klick kunde ge färre nya kort och listan
+   hoppade 2, 3, 4, 7. Här visas alltid ett jämnt steg: saknas kort klickar
+   scriptet en gång till, och kort utöver steget väntar dolda (klassen uc-wait)
+   till nästa klick. När listan är slut (knappen borta) visas allt som väntar. */
+(function () {
+  if (window.ucMoreInit) return;
+  window.ucMoreInit = true;
+  function setup() {
+    var box = document.getElementById('fundraisersDisplay');
+    var btn = document.getElementById('viewMoreBtn');
+    if (!box || !btn) return;
+    var per = parseInt((document.querySelector('input[name=cardsPerLoad]') || {}).value, 10) || 3;
+    var target = per, last = -1, timer = null;
+    /* kort som visas eller väntar (dolda testkort räknas inte) */
+    function cards() {
+      var out = [];
+      for (var i = 0; i !== box.children.length; i++) {
+        var c = box.children[i];
+        if (c.classList.contains('uc-wait') || c.offsetParent) out.push(c);
+      }
+      return out;
+    }
+    function check() {
+      clearTimeout(timer);
+      timer = setTimeout(function () {
+        var shown = box.offsetParent !== null;
+        var more = shown && btn.offsetParent !== null && !btn.disabled;
+        var limit = (shown && !more) ? Infinity : target;
+        var list = cards();
+        list.forEach(function (c, i) {
+          if (i >= limit) {
+            c.classList.add('uc-wait');
+            c.style.setProperty('display', 'none', 'important');
+          } else if (c.classList.contains('uc-wait')) {
+            c.classList.remove('uc-wait');
+            c.style.removeProperty('display');
+          }
+        });
+        if (list.length - target < 0 && more && box.children.length !== last) {
+          last = box.children.length;
+          btn.click();
+        }
+      }, 300);
+    }
+    btn.addEventListener('click', function (e) {
+      if (e.isTrusted) { target += per; last = -1; }
+      check();
+    });
+    new MutationObserver(check).observe(box, { childList: true });
+    check();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setup);
+  else setup();
+})();
