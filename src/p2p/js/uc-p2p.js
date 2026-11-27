@@ -120,7 +120,20 @@
   /* ---------- Inställningar ---------- */
   var SUMMARY_URL = BASE + '294/';
   var SUMMARY_ID  = '294';                     /* sökningen frågar alltid med Summary-kampanjens id */
-  var FOLDER      = 'P2P-2026-WIP';            /* Adoveo-mappen; BYT om mappen byter namn */
+  var FOLDER_FALLBACK = 'P2P-2026';       /* Adoveo-mappen. Används bara på sidor utan fältet #folder, se folderName() */
+  /* Mappnamnet läses från Summary-sidans fält #folder, alltså det som valts i admin.
+     Byter mappen namn i Adoveo följer koden med av sig själv. Sidor utan fältet
+     (konceptsidorna, /p/) använder namnet som senast setts i sessionen och annars
+     FOLDER_FALLBACK. Uppdatera FOLDER_FALLBACK när mappen byter namn. */
+  function folderName() {
+    var el = document.getElementById('folder');
+    var v = el && el.value;
+    try {
+      if (v) sessionStorage.setItem('uc-folder', v);
+      else v = sessionStorage.getItem('uc-folder');
+    } catch (e) {}
+    return v || FOLDER_FALLBACK;
+  }
 
   /* Äldre kampanjer i mappen, från tiden före koncepten. Deras insamlingar
      räknas till ett koncept: etikett och färg på korten, pengarna på
@@ -457,7 +470,7 @@
     var body = new URLSearchParams({
       search_name: q,
       campaign_id: SUMMARY_ID,                 /* alltid 294, oavsett sida */
-      folder: (fol && fol.value) || FOLDER
+      folder: (fol && fol.value) || folderName()
     });
     return inLine(function () {
       return fetch('/searchP2PCardsData', {
@@ -581,7 +594,7 @@
       }
     } catch (e) { /* ingen sessionStorage: hämta */ }
     var camp = (document.querySelector('#campaignId') || {}).value || SUMMARY_ID;
-    var fol = (document.querySelector('#folder') || {}).value || FOLDER;
+    var fol = (document.querySelector('#folder') || {}).value || folderName();
     var map = {}, ids = {}, extra = {};
     conceptBusy = true;
     /* De äldre kampanjerna: korten kopplas till sitt koncept och beloppen
@@ -759,11 +772,11 @@
     });
     olds.reduce(function (prev, oid) {
       return prev.then(function () {
-        return cardsByConcept(SUMMARY_ID, oid, FOLDER).then(function (j) { collect(j, oid); }, function () {});
+        return cardsByConcept(SUMMARY_ID, oid, folderName()).then(function (j) { collect(j, oid); }, function () {});
       });
-    }, cardsByConcept(SUMMARY_ID, c.id, FOLDER).then(function (j) { collect(j, null); })).then(function () {
+    }, cardsByConcept(SUMMARY_ID, c.id, folderName()).then(function (j) { collect(j, null); })).then(function () {
       return inLine(function () {
-        return fetch('/getP2PCards?' + new URLSearchParams({ offset: 0, limit: 1000, campaign_id: SUMMARY_ID, folder: FOLDER }),
+        return fetch('/getP2PCards?' + new URLSearchParams({ offset: 0, limit: 1000, campaign_id: SUMMARY_ID, folder: folderName() }),
           { headers: { 'X-Requested-With': 'XMLHttpRequest' } }).then(function (r) { return r.json(); });
       });
     }).then(function (j) {
@@ -1475,7 +1488,7 @@
     var code = p2pCode(location.pathname);
     var camp = (document.getElementById('campaign-id') || {}).value;
     if (!code || !camp) return;
-    cardsByConcept(SUMMARY_ID, camp, FOLDER).then(function (j) {
+    cardsByConcept(SUMMARY_ID, camp, folderName()).then(function (j) {
       var doc = new DOMParser().parseFromString((j && j.html) || '', 'text/html');
       var hit = null;
       doc.querySelectorAll('.cc-card').forEach(function (c) {
