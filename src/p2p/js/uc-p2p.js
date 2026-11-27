@@ -1013,12 +1013,43 @@
       return (l && l.textContent.trim()) || fallback;
     };
     var GHOST = { your_name: label('name_label', 'Ditt namn'), description: label('custom_field_3_label', 'Din text') };
+    /* Levnadsåren ([år:{custom_field_N}] i mallen) fylls inte av plattformen.
+       Fältet läses av medan man skriver och visas under namnet, som på
+       insamlingssidan. Tomt fält: fältets etikett i spökskrift. */
+    var yearsField = null, yearsBox = null;
+    var yearsText = function () {
+      if (!yearsBox || !yearsField) return;
+      var v = String(yearsField.value || '').replace(/\s*[-–—]\s*/g, '\u2013').replace(/\s+/g, ' ').trim();
+      yearsBox.textContent = '';
+      if (v) yearsBox.textContent = v;
+      else yearsBox.appendChild(el('span', 'uc-ghost', label(yearsField.id + '_label', 'Levnadsår')));
+    };
+    var years = function (node) {
+      var m = node.nodeValue.match(/\[\s*år\s*:\s*\{(custom_field_\d+)\}\s*\]/i);
+      if (!m) return;
+      yearsField = document.getElementById(m[1]);
+      if (!yearsField) return;
+      if (!yearsField.dataset.ucYears) {
+        yearsField.dataset.ucYears = '1';
+        yearsField.addEventListener('input', yearsText);
+        yearsField.addEventListener('change', yearsText);
+      }
+      /* Före beskrivningens block (markören står i det), annars där markören stod */
+      var host = node.parentNode !== msg ? node.parentNode : node;
+      if (yearsBox && yearsBox.parentNode) yearsBox.parentNode.removeChild(yearsBox);
+      yearsBox = el('span', 'uc-preview-years');
+      host.parentNode.insertBefore(yearsBox, host);
+      yearsText();
+    };
     var ghost = function () {
       for (var round = 0; round !== 5; round++) {
         var w = document.createTreeWalker(msg, NodeFilter.SHOW_TEXT), t = null, m = null;
         while (w.nextNode()) {
           if (GOAL_ANY.test(w.currentNode.nodeValue)) w.currentNode.nodeValue = w.currentNode.nodeValue.replace(GOAL_ANY, '');
-          if (YEARS_ANY.test(w.currentNode.nodeValue)) w.currentNode.nodeValue = w.currentNode.nodeValue.replace(YEARS_ANY, '');
+          if (YEARS_ANY.test(w.currentNode.nodeValue)) {
+            years(w.currentNode);
+            w.currentNode.nodeValue = w.currentNode.nodeValue.replace(YEARS_ANY, '');
+          }
           m = w.currentNode.nodeValue.match(/\{(your_name|description)\}/);
           if (m) { t = w.currentNode; break; }
         }

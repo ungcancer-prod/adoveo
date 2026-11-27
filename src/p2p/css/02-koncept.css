@@ -766,6 +766,16 @@ html.uc-fund-page #wrap-default {
     hyphens: manual;
     color: var(--uc-concept-ink);      /* svart, krämvit på mörk yta (Till minne) */
 }
+/* Levnadsåren i förhandsvisningen (createLayout): egen rad under namnet */
+#coupon-page-message .uc-preview-years {
+    display: block;
+    margin: var(--sp-2) 0 var(--sp-3);
+    font-family: var(--font-body);
+    font-size: 1.6rem;                 /* 16px */
+    line-height: 1.3;
+    letter-spacing: 0.04em;
+    color: var(--uc-concept-ink);
+}
 /* Levnadsåren (Till minne) under namnet: lugn brödtext, rubriken bär
    uttrycket */
 .uc-fund .uc-fund__years {
