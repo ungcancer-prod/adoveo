@@ -145,7 +145,12 @@
     '11e1133db': '299',                         /* Monika */
     'f2971389b': '299'                          /* Vera Mannheimer */
   };
-  var HIDE_CARDS = ['0b9b1863a', '1e1811149', 'c25910f28'];   /* Marika, Martin, Håkan: annat ändamål */
+  var HIDE_CARDS = [
+    '0b9b1863a', '1e1811149', 'c25910f28',      /* Marika, Martin, Håkan: annat ändamål */
+    'b24016774', '438516770',                   /* Pepp: Catch all test, Daniel test (syns inte i admin) */
+    '134916773',                                /* Utmaning: Team Test (syns inte i admin) */
+    'a7a916772'                                 /* Till minne: Test Testsson (syns inte i admin) */
+  ];
   function hiddenCard(code) { return HIDE_CARDS.indexOf(code) !== -1; }
   /* Konceptet för en sida eller ett kort: kampanjens egen, annars via de äldre kampanjerna */
   function conceptIdOf(camp, code) {
